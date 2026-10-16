@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local data store & uploads
+/data/*.json
+/data/*.tmp
+/public/uploads/*
+!/public/uploads/.gitkeep
+scripts/e2e/shots/
