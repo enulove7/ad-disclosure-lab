@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getStore } from "@/lib/db";
 import { getCurrentParticipant, nextStepPath } from "@/lib/participant";
+import { participantDict } from "@/lib/i18n-server";
 import { DEFAULT_SETTINGS } from "@/lib/types";
 import { ParticipantShell } from "@/components/ParticipantShell";
 import { AdStep } from "./AdStep";
@@ -13,6 +14,7 @@ export default async function AdPage(props: PageProps<"/p/[slug]/ad/[n]">) {
   const store = getStore();
   const exp = await store.getExperimentBySlug(slug);
   if (!exp) notFound();
+  const { locale, d } = participantDict(exp);
   const p = await getCurrentParticipant(exp);
   if (!p) redirect(`/p/${slug}`);
   const exposures = await store.listExposures(p.id);
@@ -36,7 +38,8 @@ export default async function AdPage(props: PageProps<"/p/[slug]/ad/[n]">) {
 
   return (
     <ParticipantShell
-      title={`広告 ${idx + 1} / ${exposures.length}`}
+      title={d.adTitle(idx + 1, exposures.length)}
+      lang={locale}
       step={idx + 2}
       totalSteps={exposures.length + 2}
     >
@@ -46,6 +49,14 @@ export default async function AdPage(props: PageProps<"/p/[slug]/ad/[n]">) {
         items={items}
         action={action}
         minSeconds={settings.min_exposure_seconds}
+        text={{
+          instruction: d.adInstruction,
+          waitTemplate: d.adWait,
+          surveyHeading: d.adSurveyHeading,
+          adWord: d.adLabel,
+          next: d.next,
+          sending: d.sending,
+        }}
       />
     </ParticipantShell>
   );

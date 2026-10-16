@@ -45,4 +45,5 @@ next-env.d.ts
 /data/*.tmp
 /public/uploads/*
 !/public/uploads/.gitkeep
-scripts/e2e/shots/
+scripts/e2e/shots*/
+AGENTS.md

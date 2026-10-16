@@ -1,4 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
+import { adminDict } from "@/lib/i18n-server";
+import { LOCALES, LOCALE_NAMES } from "@/lib/i18n";
 import { createExperimentAction } from "../actions";
 import { SaveForm } from "@/components/admin/SaveForm";
 import { btn, Card, Field, input } from "@/components/admin/ui";
@@ -7,25 +9,35 @@ export const dynamic = "force-dynamic";
 
 export default async function NewExperimentPage() {
   await requireAdmin();
+  const { locale, d } = await adminDict();
   return (
     <div className="mx-auto max-w-xl space-y-4">
-      <h1 className="text-xl font-bold">新しい実験</h1>
+      <h1 className="text-xl font-bold">{d.newExperiment}</h1>
       <Card>
-        <SaveForm action={createExperimentAction} className="space-y-4">
-          <Field name="title" title="タイトル">
-            <input id="title" name="title" className={input} placeholder="AI広告開示 実験1" required />
+        <SaveForm action={createExperimentAction} savedText={d.saved} className="space-y-4">
+          <Field name="title" title={d.title}>
+            <input id="title" name="title" className={input} required />
           </Field>
-          <Field name="slug" title="URLスラッグ（英数字・ハイフン、空欄なら自動）">
+          <Field name="slug" title={d.slug}>
             <input id="slug" name="slug" className={input} placeholder="study1" />
           </Field>
-          <Field name="description" title="メモ">
+          <Field name="locale" title={d.language}>
+            <select id="locale" name="locale" defaultValue={locale} className={input}>
+              {LOCALES.map((l) => (
+                <option key={l} value={l}>
+                  {LOCALE_NAMES[l]}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field name="description" title={d.memo}>
             <textarea id="description" name="description" className={input} rows={2} />
           </Field>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="with_presets" defaultChecked />
-            プリセットを読み込む（条件C0〜C3、デモ広告2本、基本質問セット）
+            {d.withPresets}
           </label>
-          <button className={btn}>作成</button>
+          <button className={btn}>{d.create}</button>
         </SaveForm>
       </Card>
     </div>

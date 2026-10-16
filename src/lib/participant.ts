@@ -62,8 +62,8 @@ export async function startParticipant(experiment: Experiment, userAgent: string
     store.listAds(experiment.id),
     store.countParticipantsByCondition(experiment.id),
   ]);
-  if (conditions.length === 0) throw new Error("この実験には条件が設定されていません。");
-  if (ads.length === 0) throw new Error("この実験には広告が登録されていません。");
+  if (conditions.length === 0) throw new Error("NO_CONDITIONS");
+  if (ads.length === 0) throw new Error("NO_ADS");
 
   const condition = pickCondition(conditions, counts, settings.assignment);
   const token = randomUUID();

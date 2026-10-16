@@ -1,7 +1,8 @@
 import type { Ad, Condition, LabelConfig, SurveyItem } from "@/lib/types";
+import type { Locale } from "@/lib/i18n";
 
 /** 0단계 설계안의 공개 조건 C0~C3 프리셋 */
-export const CONDITION_PRESETS: Array<Omit<Condition, "id" | "experiment_id">> = [
+const CONDITION_PRESETS_JA: Array<Omit<Condition, "id" | "experiment_id">> = [
   {
     code: "C0",
     name: "統制（表示なし）",
@@ -64,7 +65,7 @@ export const CONDITION_PRESETS: Array<Omit<Condition, "id" | "experiment_id">> =
   },
 ];
 
-export const AD_PRESETS: Array<Omit<Ad, "id" | "experiment_id">> = [
+const AD_PRESETS_JA: Array<Omit<Ad, "id" | "experiment_id">> = [
   {
     code: "AD_HEDONIC",
     name: "化粧品（快楽的）",
@@ -89,31 +90,31 @@ export const AD_PRESETS: Array<Omit<Ad, "id" | "experiment_id">> = [
   },
 ];
 
-const L7 = ["全くそう思わない", "非常にそう思う"];
+const L7_JA = ["全くそう思わない", "非常にそう思う"];
+const L7_KO = ["전혀 그렇지 않다", "매우 그렇다"];
 
-function likert(
-  phase: SurveyItem["phase"],
-  code: string,
-  construct: string,
-  text: string,
-  sort_order: number,
-): Omit<SurveyItem, "id" | "experiment_id"> {
-  return {
+type ItemPreset = Omit<SurveyItem, "id" | "experiment_id">;
+
+function likertWith(labels: string[]) {
+  return (phase: SurveyItem["phase"], code: string, construct: string, text: string, sort_order: number): ItemPreset => ({
     phase,
     code,
     construct,
     text,
     type: "likert",
     scale_points: 7,
-    scale_labels: L7,
+    scale_labels: labels,
     options: [],
     required: true,
     sort_order,
-  };
+  });
 }
+const likert = likertWith(L7_JA);
+const likertKo = likertWith(L7_KO);
+
 
 /** 기본 설문 세트. 논문 전환 시 검증된 척도 원문으로 교체하면 된다. */
-export const ITEM_PRESETS: Array<Omit<SurveyItem, "id" | "experiment_id">> = [
+const ITEM_PRESETS_JA: ItemPreset[] = [
   // --- 사전 설문 ---
   {
     phase: "pre",
@@ -165,7 +166,7 @@ export const ITEM_PRESETS: Array<Omit<SurveyItem, "id" | "experiment_id">> = [
     text: "注意確認のため、この質問では「2」を選んでください。",
     type: "likert",
     scale_points: 7,
-    scale_labels: L7,
+    scale_labels: L7_JA,
     options: [],
     required: true,
     sort_order: 12,
@@ -211,14 +212,188 @@ export const ITEM_PRESETS: Array<Omit<SurveyItem, "id" | "experiment_id">> = [
   },
 ];
 
-export const DEFAULT_CONSENT = `本調査は広告に対する印象を調べる学術的な調査です。
+const DEFAULT_CONSENT_JA = `本調査は広告に対する印象を調べる学術的な調査です。
 所要時間は約5〜7分です。回答は匿名で収集され、個人を特定する情報は記録しません。
 調査はいつでも中断できます。下のボタンを押すと、調査への参加に同意したものとみなします。`;
 
-export const DEFAULT_DEBRIEF = `ご協力ありがとうございました。
+const DEFAULT_DEBRIEF_JA = `ご協力ありがとうございました。
 本調査で表示した広告とブランドはすべて架空のものであり、画像はすべてAIによって生成されたものです。
 本調査の目的は、広告におけるAI利用の開示方法が消費者の反応にどのような影響を与えるかを調べることです。
 一部の参加者にはAI利用の表示がない広告をご覧いただきました。ご理解のほどよろしくお願いいたします。`;
+
+
+// ===================== 한국어 프리셋 =====================
+
+const CONDITION_PRESETS_KO: Array<Omit<Condition, "id" | "experiment_id">> = [
+  { ...CONDITION_PRESETS_JA[0], name: "통제 (표시 없음)" },
+  {
+    ...CONDITION_PRESETS_JA[1],
+    name: "최소 (작은 문구)",
+    label_config: { ...CONDITION_PRESETS_JA[1].label_config, text: "이미지는 AI로 생성됨" },
+  },
+  {
+    ...CONDITION_PRESETS_JA[2],
+    name: "강조 (배지)",
+    label_config: { ...CONDITION_PRESETS_JA[2].label_config, text: "AI 생성 광고" },
+  },
+  {
+    ...CONDITION_PRESETS_JA[3],
+    name: "설명형 (사람이 확인)",
+    label_config: {
+      ...CONDITION_PRESETS_JA[3].label_config,
+      text: "AI 생성 광고",
+      description: "이 광고의 이미지는 AI로 생성했으며 사람이 내용을 확인했습니다",
+    },
+  },
+];
+
+const AD_PRESETS_KO: Array<Omit<Ad, "id" | "experiment_id">> = [
+  {
+    code: "AD_HEDONIC",
+    name: "화장품 (쾌락적)",
+    brand_name: "LUMIÈRE",
+    product_category: "hedonic",
+    headline: "아침 햇살을 피부에 담다.",
+    body_text: "새로운 세럼 「LUMIÈRE 세럼」. 한 방울로 시작하는 투명한 하루.",
+    cta_text: "자세히 보기",
+    image_url: "/demo/ad-hedonic.svg",
+    sort_order: 0,
+  },
+  {
+    code: "AD_UTIL",
+    name: "자동차보험 (실용적)",
+    brand_name: "세이프드라이브 보험",
+    product_category: "utilitarian",
+    headline: "만약의 순간에도, 월 19,800원부터.",
+    body_text: "사고 접수 24시간 365일. 온라인 가입 시 최대 20% 할인.",
+    cta_text: "견적 받기",
+    image_url: "/demo/ad-utilitarian-ko.svg",
+    sort_order: 1,
+  },
+];
+
+const ITEM_PRESETS_KO: ItemPreset[] = [
+  {
+    phase: "pre",
+    code: "age",
+    construct: "demographic",
+    text: "귀하의 연령대를 알려 주세요.",
+    type: "single",
+    scale_points: 0,
+    scale_labels: [],
+    options: ["18~24세", "25~34세", "35~44세", "45~54세", "55~64세", "65세 이상"],
+    required: true,
+    sort_order: 0,
+  },
+  {
+    phase: "pre",
+    code: "gender",
+    construct: "demographic",
+    text: "귀하의 성별을 알려 주세요.",
+    type: "single",
+    scale_points: 0,
+    scale_labels: [],
+    options: ["여성", "남성", "기타", "응답하지 않음"],
+    required: true,
+    sort_order: 1,
+  },
+  likertKo("pre", "ai_att1", "ai_attitude", "AI 기술은 사회에 유익하다고 생각한다.", 2),
+  likertKo("pre", "ai_att2", "ai_attitude", "AI가 만든 콘텐츠에 거부감이 없다.", 3),
+  likertKo("pre", "ai_att3", "ai_attitude", "AI를 활용한 서비스를 자주 이용한다.", 4),
+  likertKo("pre", "ad_skep1", "ad_skepticism", "광고는 대체로 믿을 수 없다.", 5),
+  likertKo("pre", "ad_skep2", "ad_skepticism", "광고는 제품의 좋은 면만 전달한다.", 6),
+
+  likertKo("post_ad", "aad1", "ad_attitude", "이 광고는 호감이 간다.", 0),
+  likertKo("post_ad", "aad2", "ad_attitude", "이 광고는 매력적이다.", 1),
+  likertKo("post_ad", "aad3", "ad_attitude", "이 광고는 좋은 광고다.", 2),
+  likertKo("post_ad", "pi1", "purchase_intention", "이 제품을 구매하고 싶다.", 3),
+  likertKo("post_ad", "pi2", "purchase_intention", "기회가 있다면 이 제품을 고려하겠다.", 4),
+  likertKo("post_ad", "dec1", "perceived_deception", "이 광고는 소비자를 오해하게 만들려 한다.", 5),
+  likertKo("post_ad", "dec2", "perceived_deception", "이 광고에는 무언가 숨겨진 것이 있다고 느낀다.", 6),
+  likertKo("post_ad", "trans1", "perceived_transparency", "이 광고주는 정직하다고 느낀다.", 7),
+  likertKo("post_ad", "trans2", "perceived_transparency", "이 광고는 정보를 숨기지 않고 공개하고 있다.", 8),
+  likertKo("post_ad", "trust1", "brand_trust", "이 브랜드는 신뢰할 수 있다.", 9),
+  likertKo("post_ad", "trust2", "brand_trust", "이 브랜드는 진실하다고 생각한다.", 10),
+  likertKo("post_ad", "auth1", "authenticity", "이 광고에는 사람다운 따뜻함이 있다.", 11),
+  {
+    ...likertKo("post_ad", "attn1", "attention_check", "주의 확인을 위해 이 질문에서는 「2」를 선택해 주세요.", 12),
+  },
+
+  {
+    phase: "final",
+    code: "mc_notice",
+    construct: "manipulation_check",
+    text: "앞서 본 광고에 AI 관련 표시가 있었습니까?",
+    type: "single",
+    scale_points: 0,
+    scale_labels: [],
+    options: ["있었다", "없었다", "모르겠다"],
+    required: true,
+    sort_order: 0,
+  },
+  likertKo("final", "mc_ai", "manipulation_check", "광고 이미지는 AI로 만들어졌다고 생각한다.", 1),
+  {
+    phase: "final",
+    code: "ai_ad_exp",
+    construct: "exposure_experience",
+    text: "지금까지 AI로 만든 광고를 본 적이 있습니까?",
+    type: "single",
+    scale_points: 0,
+    scale_labels: [],
+    options: ["자주 있다", "가끔 있다", "거의 없다", "모르겠다"],
+    required: true,
+    sort_order: 2,
+  },
+  {
+    phase: "final",
+    code: "open",
+    construct: "open_ended",
+    text: "광고를 보고 느낀 점을 자유롭게 적어 주세요 (선택).",
+    type: "text",
+    scale_points: 0,
+    scale_labels: [],
+    options: [],
+    required: false,
+    sort_order: 3,
+  },
+];
+
+const DEFAULT_CONSENT_KO = `본 조사는 광고에 대한 인상을 알아보는 학술 조사입니다.
+소요 시간은 약 5~7분입니다. 응답은 익명으로 수집되며 개인을 식별할 수 있는 정보는 기록하지 않습니다.
+조사는 언제든지 중단할 수 있습니다. 아래 버튼을 누르면 조사 참여에 동의한 것으로 간주합니다.`;
+
+const DEFAULT_DEBRIEF_KO = `참여해 주셔서 감사합니다.
+본 조사에서 보여드린 광고와 브랜드는 모두 가상이며, 이미지는 모두 AI로 생성되었습니다.
+본 조사의 목적은 광고에서 AI 사용을 공개하는 방식이 소비자 반응에 어떤 영향을 미치는지 알아보는 것입니다.
+일부 참가자에게는 AI 사용 표시가 없는 광고를 보여드렸습니다. 양해 부탁드립니다.`;
+
+export interface PresetBundle {
+  conditions: Array<Omit<Condition, "id" | "experiment_id">>;
+  ads: Array<Omit<Ad, "id" | "experiment_id">>;
+  items: ItemPreset[];
+  consent: string;
+  debrief: string;
+}
+
+/** 언어별 프리셋 묶음 */
+export function getPresets(locale: Locale): PresetBundle {
+  if (locale === "ko") {
+    return {
+      conditions: CONDITION_PRESETS_KO,
+      ads: AD_PRESETS_KO,
+      items: ITEM_PRESETS_KO,
+      consent: DEFAULT_CONSENT_KO,
+      debrief: DEFAULT_DEBRIEF_KO,
+    };
+  }
+  return {
+    conditions: CONDITION_PRESETS_JA,
+    ads: AD_PRESETS_JA,
+    items: ITEM_PRESETS_JA,
+    consent: DEFAULT_CONSENT_JA,
+    debrief: DEFAULT_DEBRIEF_JA,
+  };
+}
 
 export function labelSummary(l: LabelConfig): string {
   if (!l.enabled) return "表示なし";

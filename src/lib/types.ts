@@ -23,6 +23,8 @@ export interface ExperimentSettings {
   randomize_ad_order: boolean;
   /** 조건 배정 방식: balanced = 가장 적게 배정된 조건 우선, weighted = 가중치 확률 */
   assignment: "balanced" | "weighted";
+  /** 참가자 화면 언어 */
+  locale: "ja" | "ko";
 }
 
 export type LabelPosition =
@@ -135,6 +137,7 @@ export const DEFAULT_SETTINGS: ExperimentSettings = {
   ads_per_participant: 0,
   randomize_ad_order: true,
   assignment: "balanced",
+  locale: "ja",
 };
 
 export const DEFAULT_LABEL: LabelConfig = {

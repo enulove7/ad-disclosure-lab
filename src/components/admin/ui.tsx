@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Dict } from "@/lib/i18n";
 
 export const input =
   "w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none";
@@ -45,14 +46,14 @@ export function Card({ title, children, right }: { title?: string; children: Rea
   );
 }
 
-export function Tabs({ id, active }: { id: string; active: string }) {
-  const tabs = [
-    ["", "概要"],
-    ["conditions", "条件"],
-    ["ads", "広告"],
-    ["survey", "質問"],
-    ["preview", "プレビュー"],
-    ["participants", "参加者"],
+export function Tabs({ id, active, d }: { id: string; active: string; d: Dict["a"] }) {
+  const tabs: Array<[string, string]> = [
+    ["", d.tabs.overview],
+    ["conditions", d.tabs.conditions],
+    ["ads", d.tabs.ads],
+    ["survey", d.tabs.survey],
+    ["preview", d.tabs.preview],
+    ["participants", d.tabs.participants],
   ];
   return (
     <nav className="mb-6 flex flex-wrap gap-1 border-b border-neutral-200">

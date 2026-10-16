@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { consentAction, type ActionState } from "./actions";
 
-export function ConsentForm({ slug }: { slug: string }) {
+export function ConsentForm({ slug, startLabel, pendingLabel }: { slug: string; startLabel: string; pendingLabel: string }) {
   const [state, formAction, pending] = useActionState(
     async (): Promise<ActionState> => consentAction(slug),
     {},
@@ -16,7 +16,7 @@ export function ConsentForm({ slug }: { slug: string }) {
         disabled={pending}
         className="w-full rounded-lg bg-neutral-900 px-4 py-3 font-semibold text-white disabled:bg-neutral-400"
       >
-        {pending ? "準備中…" : "同意して調査を始める"}
+        {pending ? pendingLabel : startLabel}
       </button>
     </form>
   );

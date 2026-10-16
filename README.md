@@ -31,6 +31,13 @@ service role 키는 서버에서만 쓰이고 브라우저로는 절대 나가�
 리포지토리를 연결하고 환경변수 3개(`ADMIN_PASSWORD`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`)를 넣으면 끝.
 Vercel의 파일시스템은 읽기 전용이라 로컬 JSON 저장소는 배포 환경에서 쓸 수 없다. 반드시 Supabase를 설정할 것.
 
+## 언어 (일본어 / 한국어)
+
+- **참가자 화면**: 실험마다 언어를 정한다(새 실험 만들기 또는 개요 탭의 「참가자 화면 언어」). 프리셋도 그 언어로 들어간다.
+  일본인 대상 실험과 한국인 대상 실험을 같은 앱에서 동시에 돌릴 수 있다.
+- **관리자 화면**: 오른쪽 위 토글(日本語 / 한국어)로 바꾼다. 쿠키에 저장되며 기본은 한국어.
+- 문구는 모두 `src/lib/i18n.ts` 한 파일에 있다. 영어 등 다른 언어를 추가하려면 `Locale`에 코드를 추가하고 사전을 하나 더 쓰면 된다.
+
 ## 구조
 
 ```
@@ -42,7 +49,8 @@ src/
   lib/types.ts          도메인 타입(=DB 컬럼명)
   lib/db/               저장소 인터페이스 + 로컬 JSON 구현 + Supabase 구현
   lib/participant.ts    조건 배정, 노출 순서, 다음 단계 계산, 응답 파싱
-  lib/presets.ts        C0~C3 조건, 데모 광고, 기본 설문 세트(일본어)
+  lib/presets.ts        C0~C3 조건, 데모 광고, 기본 설문 세트(일본어·한국어)
+  lib/i18n.ts           화면 고정 문구 사전(ja / ko)
   lib/export.ts         long / wide CSV 생성
 supabase/migrations/    DB 스키마
 scripts/e2e/flow.mjs    Playwright 스모크 테스트(관리자 생성 → 참가자 5명 완주 → CSV 확인)

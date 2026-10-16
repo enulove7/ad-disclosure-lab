@@ -6,6 +6,11 @@ import type { ActionState } from "@/app/p/[slug]/actions";
 
 type Action = (prev: ActionState, form: FormData) => Promise<ActionState>;
 
+export interface SurveyFormText {
+  next: string;
+  sending: string;
+}
+
 /**
  * 설문 렌더러. 문항 타입별 입력 UI를 그리고 서버 액션으로 제출한다.
  * hidden 으로 노출 시간 같은 부가 데이터를 함께 보낼 수 있다.
@@ -13,13 +18,15 @@ type Action = (prev: ActionState, form: FormData) => Promise<ActionState>;
 export function SurveyForm({
   items,
   action,
-  submitLabel = "次へ",
+  text,
+  submitLabel,
   hidden,
   disabled = false,
   children,
 }: {
   items: SurveyItem[];
   action: Action;
+  text: SurveyFormText;
   submitLabel?: string;
   hidden?: Record<string, string>;
   disabled?: boolean;
@@ -61,7 +68,7 @@ export function SurveyForm({
         disabled={pending || disabled}
         className="w-full rounded-lg bg-neutral-900 px-4 py-3 text-base font-semibold text-white disabled:cursor-not-allowed disabled:bg-neutral-400"
       >
-        {pending ? "送信中…" : submitLabel}
+        {pending ? text.sending : (submitLabel ?? text.next)}
       </button>
     </form>
   );
@@ -112,19 +119,11 @@ function ItemInput({ item }: { item: SurveyItem }) {
 
   if (item.type === "number") {
     return (
-      <input
-        type="number"
-        name={name}
-        className="mt-3 w-full rounded-md border border-neutral-300 px-3 py-2"
-      />
+      <input type="number" name={name} className="mt-3 w-full rounded-md border border-neutral-300 px-3 py-2" />
     );
   }
 
   return (
-    <textarea
-      name={name}
-      rows={3}
-      className="mt-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
-    />
+    <textarea name={name} rows={3} className="mt-3 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
   );
 }

@@ -5,7 +5,7 @@ import { DisclosureLabel } from "./DisclosureLabel";
  * 광고 카드. 이미지 위에 조건별 공개 라벨을 CSS로 오버레이한다.
  * 이미지 자체는 모든 조건에서 동일하므로 라벨 외의 차이가 생기지 않는다.
  */
-export function AdCard({ ad, label }: { ad: Ad; label: LabelConfig }) {
+export function AdCard({ ad, label, adWord = "AD" }: { ad: Ad; label: LabelConfig; adWord?: string }) {
   const topBar = label.enabled && label.position === "top-bar";
   const bottomBar = label.enabled && label.position === "bottom-bar";
   const below = label.enabled && label.position === "below-image";
@@ -19,7 +19,7 @@ export function AdCard({ ad, label }: { ad: Ad; label: LabelConfig }) {
         </div>
         <div className="leading-tight">
           <div className="text-sm font-semibold">{ad.brand_name}</div>
-          <div className="text-xs text-neutral-500">広告</div>
+          <div className="text-xs text-neutral-500">{adWord}</div>
         </div>
       </header>
 

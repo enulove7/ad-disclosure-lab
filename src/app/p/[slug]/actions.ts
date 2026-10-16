@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getStore } from "@/lib/db";
 import { getCurrentParticipant, nextStepPath, parseAnswers, startParticipant } from "@/lib/participant";
+import { participantDict } from "@/lib/i18n-server";
 
 export interface ActionState {
   error?: string;
@@ -18,7 +19,8 @@ async function loadExperiment(slug: string) {
 
 export async function consentAction(slug: string): Promise<ActionState> {
   const exp = await loadExperiment(slug);
-  if (exp.status !== "active") return { error: "この調査は現在受け付けていません。" };
+  const { d } = participantDict(exp);
+  if (exp.status !== "active") return { error: d.closed };
   const existing = await getCurrentParticipant(exp);
   if (existing) {
     const exposures = await getStore().listExposures(existing.id);
@@ -28,7 +30,9 @@ export async function consentAction(slug: string): Promise<ActionState> {
   try {
     await startParticipant(exp, ua);
   } catch (e) {
-    return { error: e instanceof Error ? e.message : "開始できませんでした。" };
+    const msg = e instanceof Error ? e.message : "";
+    const mapped = msg === "NO_CONDITIONS" ? d.noConditions : msg === "NO_ADS" ? d.noAds : d.startFailed;
+    return { error: mapped };
   }
   redirect(`/p/${slug}/pre`);
 }
@@ -47,7 +51,7 @@ export async function submitPreAction(
   }
   const items = (await store.listItems(exp.id)).filter((i) => i.phase === "pre");
   const { values, errors } = parseAnswers(items, form);
-  if (errors.length) return { error: "未回答の質問があります。", missing: errors };
+  if (errors.length) return { error: participantDict(exp).d.missing, missing: errors };
 
   const now = new Date().toISOString();
   await store.createResponses(
@@ -76,12 +80,12 @@ export async function submitAdAction(
   if (!p) redirect(`/p/${slug}`);
   const exposures = await store.listExposures(p.id);
   const exposure = exposures.find((x) => x.id === exposureId);
-  if (!exposure) return { error: "不正なリクエストです。" };
+  if (!exposure) return { error: participantDict(exp).d.badRequest };
   if (exposure.duration_ms !== null) redirect(nextStepPath(slug, p, exposures));
 
   const items = (await store.listItems(exp.id)).filter((i) => i.phase === "post_ad");
   const { values, errors } = parseAnswers(items, form);
-  if (errors.length) return { error: "未回答の質問があります。", missing: errors };
+  if (errors.length) return { error: participantDict(exp).d.missing, missing: errors };
 
   const duration = Number(form.get("duration_ms"));
   const shownAt = String(form.get("shown_at") ?? "");
@@ -124,7 +128,7 @@ export async function submitFinalAction(
 
   const items = (await store.listItems(exp.id)).filter((i) => i.phase === "final");
   const { values, errors } = parseAnswers(items, form);
-  if (errors.length) return { error: "未回答の質問があります。", missing: errors };
+  if (errors.length) return { error: participantDict(exp).d.missing, missing: errors };
 
   const now = new Date().toISOString();
   await store.createResponses(

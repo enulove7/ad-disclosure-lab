@@ -5,13 +5,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getStore } from "@/lib/db";
 import { ADMIN_COOKIE, adminSessionValue, checkPassword, requireAdmin } from "@/lib/auth";
-import {
-  AD_PRESETS,
-  CONDITION_PRESETS,
-  DEFAULT_CONSENT,
-  DEFAULT_DEBRIEF,
-  ITEM_PRESETS,
-} from "@/lib/presets";
+import { getPresets } from "@/lib/presets";
+import { asLocale, LOCALES, type Locale } from "@/lib/i18n";
+import { ADMIN_LOCALE_COOKIE, adminDict } from "@/lib/i18n-server";
 import {
   DEFAULT_LABEL,
   DEFAULT_SETTINGS,
@@ -41,8 +37,9 @@ const bool = (f: FormData, k: string) => f.get(k) === "on" || f.get(k) === "true
 
 // ---------- 로그인 ----------
 export async function loginAction(_prev: FormState, form: FormData): Promise<FormState> {
+  const { d } = await adminDict();
   const pw = str(form, "password");
-  if (!checkPassword(pw)) return { error: "パスワードが違います。" };
+  if (!checkPassword(pw)) return { error: d.wrongPassword };
   const jar = await cookies();
   jar.set(ADMIN_COOKIE, adminSessionValue(), {
     httpOnly: true,
@@ -61,6 +58,16 @@ export async function logoutAction() {
   redirect("/admin/login");
 }
 
+/** 관리자 화면 언어 토글 (쿠키) */
+export async function setAdminLocaleAction(form: FormData) {
+  const locale: Locale = asLocale(str(form, "locale"));
+  if (!LOCALES.includes(locale)) return;
+  const jar = await cookies();
+  jar.set(ADMIN_LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  const back = str(form, "back", "/admin");
+  redirect(back.startsWith("/") ? back : "/admin");
+}
+
 // ---------- 실험 ----------
 function slugify(s: string) {
   return s
@@ -72,28 +79,31 @@ function slugify(s: string) {
 
 export async function createExperimentAction(_prev: FormState, form: FormData): Promise<FormState> {
   await requireAdmin();
+  const { d } = await adminDict();
   const store = getStore();
   const title = str(form, "title").trim();
-  if (!title) return { error: "タイトルは必須です。" };
+  if (!title) return { error: d.titleRequired };
   let slug = slugify(str(form, "slug") || title);
   if (!slug) slug = `exp-${Date.now().toString(36)}`;
-  if (await store.getExperimentBySlug(slug)) return { error: "このスラッグは既に使われています。" };
+  if (await store.getExperimentBySlug(slug)) return { error: d.slugTaken };
 
+  const locale = asLocale(str(form, "locale"));
+  const presets = getPresets(locale);
   const withPresets = bool(form, "with_presets");
   const exp = await store.createExperiment({
     slug,
     title,
     description: str(form, "description"),
     status: "draft",
-    consent_text: DEFAULT_CONSENT,
-    debrief_text: DEFAULT_DEBRIEF,
-    settings: DEFAULT_SETTINGS,
+    consent_text: presets.consent,
+    debrief_text: presets.debrief,
+    settings: { ...DEFAULT_SETTINGS, locale },
   });
 
   if (withPresets) {
-    for (const c of CONDITION_PRESETS) await store.createCondition({ ...c, experiment_id: exp.id });
-    for (const a of AD_PRESETS) await store.createAd({ ...a, experiment_id: exp.id });
-    for (const i of ITEM_PRESETS) await store.createItem({ ...i, experiment_id: exp.id });
+    for (const c of presets.conditions) await store.createCondition({ ...c, experiment_id: exp.id });
+    for (const a of presets.ads) await store.createAd({ ...a, experiment_id: exp.id });
+    for (const i of presets.items) await store.createItem({ ...i, experiment_id: exp.id });
   }
   revalidatePath("/admin");
   redirect(`/admin/${exp.id}`);
@@ -110,6 +120,7 @@ export async function updateExperimentAction(id: string, _prev: FormState, form:
     assignment: (str(form, "assignment", "balanced") === "weighted" ? "weighted" : "balanced") as
       | "balanced"
       | "weighted",
+    locale: asLocale(str(form, "locale")),
   };
   await store.updateExperiment(id, {
     title: str(form, "title").trim() || "Untitled",
@@ -150,7 +161,7 @@ export async function saveConditionAction(experimentId: string, _prev: FormState
   const data = {
     experiment_id: experimentId,
     code: str(form, "code").trim() || "C?",
-    name: str(form, "name").trim() || "条件",
+    name: str(form, "name").trim() || "C?",
     weight: Math.max(0, num(form, "weight", 1)),
     sort_order: num(form, "sort_order", 0),
     label_config: parseLabel(form),
@@ -175,13 +186,13 @@ export async function saveAdAction(experimentId: string, _prev: FormState, form:
   let image_url = str(form, "image_url").trim();
   const file = form.get("image_file");
   if (file instanceof File && file.size > 0) {
-    if (file.size > 8 * 1024 * 1024) return { error: "画像は8MB以下にしてください。" };
+    if (file.size > 8 * 1024 * 1024) return { error: (await adminDict()).d.imageTooLarge };
     image_url = await store.uploadImage(file, file.name);
   }
   const data = {
     experiment_id: experimentId,
     code: str(form, "code").trim() || `AD${Date.now().toString(36)}`,
-    name: str(form, "name").trim() || "広告",
+    name: str(form, "name").trim() || "AD",
     brand_name: str(form, "brand_name"),
     product_category: str(form, "product_category"),
     headline: str(form, "headline"),
@@ -230,7 +241,7 @@ export async function saveItemAction(experimentId: string, _prev: FormState, for
     required: bool(form, "required"),
     sort_order: num(form, "sort_order", 0),
   };
-  if (!data.text) return { error: "質問文は必須です。" };
+  if (!data.text) return { error: (await adminDict()).d.questionRequired };
   if (id) await store.updateItem(id, data);
   else await store.createItem(data);
   revalidatePath(`/admin/${experimentId}/survey`);
