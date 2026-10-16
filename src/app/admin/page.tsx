@@ -13,7 +13,13 @@ export default async function AdminHome() {
   await requireAdmin();
   const { d } = await adminDict();
   const store = getStore();
-  const experiments = await store.listExperiments();
+  let experiments: Awaited<ReturnType<typeof store.listExperiments>> = [];
+  let dbError: string | null = null;
+  try {
+    experiments = await store.listExperiments();
+  } catch (e) {
+    dbError = e instanceof Error ? e.message : String(e);
+  }
   const counts = await Promise.all(
     experiments.map(async (e) => {
       const ps = await store.listParticipants(e.id);
@@ -34,6 +40,14 @@ export default async function AdminHome() {
           </Link>
         </div>
       </div>
+
+      {dbError && (
+        <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800">
+          <div className="font-semibold">{d.dbErrorTitle}</div>
+          <p className="mt-1">{d.dbErrorHint}</p>
+          <code className="mt-2 block break-all rounded bg-white/70 p-2 text-xs">{dbError}</code>
+        </div>
+      )}
 
       {experiments.length === 0 ? (
         <Card>

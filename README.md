@@ -28,7 +28,7 @@ service role 키는 서버에서만 쓰이고 브라우저로는 절대 나가�
 
 ## Vercel 배포
 
-리포지토리를 연결하고 환경변수 3개(`ADMIN_PASSWORD`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`)를 넣으면 끝.
+단계별 안내는 [DEPLOY.md](./DEPLOY.md). 요약하면 저장소를 Vercel에 연결하고 환경변수 3개(`ADMIN_PASSWORD`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`)를 넣으면 끝.
 Vercel의 파일시스템은 읽기 전용이라 로컬 JSON 저장소는 배포 환경에서 쓸 수 없다. 반드시 Supabase를 설정할 것.
 
 ## 언어 (일본어 / 한국어)

@@ -50,6 +50,9 @@ const ja = {
     experiments: "実験一覧",
     newExperiment: "新しい実験",
     noExperiments: "まだ実験がありません。「新しい実験」から、C0〜C3のプリセット付きで作成できます。",
+    dbErrorTitle: "データベースに接続できません",
+    dbErrorHint:
+      "Supabase の SQL Editor で supabase/migrations/0001_init.sql を実行したか、SUPABASE_URL と SUPABASE_SERVICE_ROLE_KEY が正しいかを確認してください。",
     participated: (total: number, done: number) => `参加 ${total} / 完了 ${done}`,
     status: { draft: "下書き", active: "公開中", closed: "終了" } as Record<string, string>,
     joinUrl: "参加URL",
@@ -204,6 +207,9 @@ const ko: Dict = {
     experiments: "실험 목록",
     newExperiment: "새 실험",
     noExperiments: "아직 실험이 없습니다. 「새 실험」에서 C0~C3 프리셋과 함께 만들 수 있습니다.",
+    dbErrorTitle: "데이터베이스에 연결할 수 없습니다",
+    dbErrorHint:
+      "Supabase SQL Editor에서 supabase/migrations/0001_init.sql을 실행했는지, SUPABASE_URL과 SUPABASE_SERVICE_ROLE_KEY가 정확한지 확인하세요.",
     participated: (total, done) => `참여 ${total} / 완료 ${done}`,
     status: { draft: "초안", active: "공개 중", closed: "종료" },
     joinUrl: "참여 URL",
