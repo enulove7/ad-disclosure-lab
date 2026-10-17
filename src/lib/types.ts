@@ -163,3 +163,74 @@ export const DEFAULT_LABEL: LabelConfig = {
   style: "subtle",
   show_icon: false,
 };
+
+// ---------------- 게임 ----------------
+
+export interface GameSettings {
+  /** 한 판에 보여줄 카드 수. 0이면 전부 */
+  cards_per_round: number;
+  /** 결과 화면에서 연결할 실험 slug (비우면 링크 없음) */
+  link_experiment_slug: string;
+  locale: "ja" | "ko";
+  /** 판정 전에 호감도를 묻는지 */
+  ask_liking: boolean;
+}
+
+export const DEFAULT_GAME_SETTINGS: GameSettings = {
+  cards_per_round: 10,
+  link_experiment_slug: "",
+  locale: "ja",
+  ask_liking: true,
+};
+
+export interface Game {
+  id: string;
+  slug: string;
+  title: string;
+  intro_text: string;
+  status: ExperimentStatus;
+  settings: GameSettings;
+  created_at: string;
+}
+
+export interface GameCard {
+  id: string;
+  game_id: string;
+  brand_name: string;
+  headline: string;
+  body_text: string;
+  image_url: string;
+  /** true = AI 생성, false = 사람 제작 */
+  is_ai: boolean;
+  /** 출처·라이선스 메모 (사람 제작 이미지의 경우 필수에 가깝다) */
+  source_note: string;
+  gen_prompt: string;
+  gen_model: string;
+  sort_order: number;
+}
+
+export interface GameSession {
+  id: string;
+  game_id: string;
+  token: string;
+  /** 이번 판에 배정된 카드 id 순서 */
+  card_ids: string[];
+  user_agent: string;
+  started_at: string;
+  completed_at: string | null;
+  score: number;
+  total: number;
+}
+
+export interface GameAnswer {
+  id: string;
+  session_id: string;
+  card_id: string;
+  sort_order: number;
+  guess_ai: boolean;
+  correct: boolean;
+  liking_before: number | null;
+  liking_after: number | null;
+  response_ms: number | null;
+  answered_at: string;
+}

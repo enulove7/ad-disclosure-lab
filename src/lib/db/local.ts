@@ -8,6 +8,10 @@ import type {
   Condition,
   Experiment,
   Exposure,
+  Game,
+  GameAnswer,
+  GameCard,
+  GameSession,
   Participant,
   Response,
   SurveyItem,
@@ -26,6 +30,10 @@ interface DbShape {
   participants: Participant[];
   exposures: Exposure[];
   responses: Response[];
+  games: Game[];
+  game_cards: GameCard[];
+  game_sessions: GameSession[];
+  game_answers: GameAnswer[];
 }
 
 const EMPTY: DbShape = {
@@ -37,6 +45,10 @@ const EMPTY: DbShape = {
   participants: [],
   exposures: [],
   responses: [],
+  games: [],
+  game_cards: [],
+  game_sessions: [],
+  game_answers: [],
 };
 
 const DB_PATH = path.join(process.cwd(), "data", "db.json");
@@ -275,6 +287,94 @@ export const localStore: Store = {
       db.participants.filter((p) => p.experiment_id === experimentId).map((p) => p.id),
     );
     return db.responses.filter((r) => pids.has(r.participant_id));
+  },
+
+  // ---------- games ----------
+  async listGames() {
+    const db = await readDb();
+    return [...db.games].sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+  async getGame(id) {
+    const db = await readDb();
+    return db.games.find((g) => g.id === id) ?? null;
+  },
+  async getGameBySlug(slug) {
+    const db = await readDb();
+    return db.games.find((g) => g.slug === slug) ?? null;
+  },
+  createGame(data) {
+    return mutate((db) => {
+      if (db.games.some((g) => g.slug === data.slug)) throw new Error("slug already exists");
+      const row: Game = { ...data, id: randomUUID(), created_at: new Date().toISOString() };
+      db.games.push(row);
+      return row;
+    });
+  },
+  updateGame(id, patch) {
+    return mutate((db) => patchRow(db.games, id, patch));
+  },
+  deleteGame(id) {
+    return mutate((db) => {
+      const sids = new Set(db.game_sessions.filter((s) => s.game_id === id).map((s) => s.id));
+      db.game_answers = db.game_answers.filter((a) => !sids.has(a.session_id));
+      db.game_sessions = db.game_sessions.filter((s) => s.game_id !== id);
+      db.game_cards = db.game_cards.filter((c) => c.game_id !== id);
+      db.games = db.games.filter((g) => g.id !== id);
+    });
+  },
+  async listGameCards(gameId) {
+    const db = await readDb();
+    return sortBy(db.game_cards.filter((c) => c.game_id === gameId));
+  },
+  createGameCard(data) {
+    return mutate((db) => {
+      const row: GameCard = { ...data, id: randomUUID() };
+      db.game_cards.push(row);
+      return row;
+    });
+  },
+  updateGameCard(id, patch) {
+    return mutate((db) => patchRow(db.game_cards, id, patch));
+  },
+  deleteGameCard(id) {
+    return mutate((db) => {
+      db.game_cards = db.game_cards.filter((c) => c.id !== id);
+      db.game_answers = db.game_answers.filter((a) => a.card_id !== id);
+    });
+  },
+  createGameSession(data) {
+    return mutate((db) => {
+      const row: GameSession = { ...data, id: randomUUID() };
+      db.game_sessions.push(row);
+      return row;
+    });
+  },
+  async getGameSessionByToken(token) {
+    const db = await readDb();
+    return db.game_sessions.find((s) => s.token === token) ?? null;
+  },
+  updateGameSession(id, patch) {
+    return mutate((db) => patchRow(db.game_sessions, id, patch));
+  },
+  async listGameSessions(gameId) {
+    const db = await readDb();
+    return db.game_sessions.filter((s) => s.game_id === gameId);
+  },
+  createGameAnswer(data) {
+    return mutate((db) => {
+      const row: GameAnswer = { ...data, id: randomUUID() };
+      db.game_answers.push(row);
+      return row;
+    });
+  },
+  async listGameAnswers(sessionId) {
+    const db = await readDb();
+    return sortBy(db.game_answers.filter((a) => a.session_id === sessionId));
+  },
+  async listGameAnswersByGame(gameId) {
+    const db = await readDb();
+    const sids = new Set(db.game_sessions.filter((s) => s.game_id === gameId).map((s) => s.id));
+    return db.game_answers.filter((a) => sids.has(a.session_id));
   },
 
   async uploadImage(file, filename) {

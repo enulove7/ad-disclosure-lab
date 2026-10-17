@@ -32,6 +32,9 @@ export default async function AdminHome() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{d.experiments}</h1>
         <div className="flex gap-2">
+          <Link href="/admin/games" className={btnGhost}>
+            {d.games}
+          </Link>
           <form action={logoutAction}>
             <button className={btnGhost}>{d.logout}</button>
           </form>

@@ -4,6 +4,10 @@ import type {
   Condition,
   Experiment,
   Exposure,
+  Game,
+  GameAnswer,
+  GameCard,
+  GameSession,
   Participant,
   Response,
   SurveyItem,
@@ -59,6 +63,25 @@ export interface Store {
   createResponses(data: Omit<Response, "id">[]): Promise<Response[]>;
   listResponses(participantId: string): Promise<Response[]>;
   listResponsesByExperiment(experimentId: string): Promise<Response[]>;
+
+  // games
+  listGames(): Promise<Game[]>;
+  getGame(id: string): Promise<Game | null>;
+  getGameBySlug(slug: string): Promise<Game | null>;
+  createGame(data: Omit<Game, "id" | "created_at">): Promise<Game>;
+  updateGame(id: string, patch: Partial<Game>): Promise<Game>;
+  deleteGame(id: string): Promise<void>;
+  listGameCards(gameId: string): Promise<GameCard[]>;
+  createGameCard(data: Omit<GameCard, "id">): Promise<GameCard>;
+  updateGameCard(id: string, patch: Partial<GameCard>): Promise<GameCard>;
+  deleteGameCard(id: string): Promise<void>;
+  createGameSession(data: Omit<GameSession, "id">): Promise<GameSession>;
+  getGameSessionByToken(token: string): Promise<GameSession | null>;
+  updateGameSession(id: string, patch: Partial<GameSession>): Promise<GameSession>;
+  listGameSessions(gameId: string): Promise<GameSession[]>;
+  createGameAnswer(data: Omit<GameAnswer, "id">): Promise<GameAnswer>;
+  listGameAnswers(sessionId: string): Promise<GameAnswer[]>;
+  listGameAnswersByGame(gameId: string): Promise<GameAnswer[]>;
 
   // files
   uploadImage(file: File, filename: string): Promise<string>;
