@@ -24,7 +24,7 @@ export default async function FinalPage(props: PageProps<"/p/[slug]/final">) {
 
   return (
     <ParticipantShell title={d.finalTitle} lang={locale} step={exposures.length + 2} totalSteps={exposures.length + 2}>
-      <SurveyForm items={items} action={action} text={{ next: d.next, sending: d.sending }} submitLabel={d.finalSubmit} />
+      <SurveyForm items={items} action={action} text={{ next: d.next, sending: d.sending, missing: d.missing }} submitLabel={d.finalSubmit} />
     </ParticipantShell>
   );
 }

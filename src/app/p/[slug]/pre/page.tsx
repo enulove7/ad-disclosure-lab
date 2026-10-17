@@ -24,7 +24,7 @@ export default async function PrePage(props: PageProps<"/p/[slug]/pre">) {
 
   return (
     <ParticipantShell title={d.preTitle} lang={locale} step={1} totalSteps={exposures.length + 2}>
-      <SurveyForm items={items} action={action} text={{ next: d.next, sending: d.sending }} />
+      <SurveyForm items={items} action={action} text={{ next: d.next, sending: d.sending, missing: d.missing }} />
     </ParticipantShell>
   );
 }

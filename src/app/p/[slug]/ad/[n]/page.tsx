@@ -56,6 +56,7 @@ export default async function AdPage(props: PageProps<"/p/[slug]/ad/[n]">) {
           adWord: d.adLabel,
           next: d.next,
           sending: d.sending,
+          missing: d.missing,
         }}
       />
     </ParticipantShell>

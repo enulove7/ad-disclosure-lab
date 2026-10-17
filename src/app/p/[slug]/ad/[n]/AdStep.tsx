@@ -14,6 +14,7 @@ export interface AdStepText {
   adWord: string;
   next: string;
   sending: string;
+  missing: string;
 }
 
 /**
@@ -68,7 +69,7 @@ export function AdStep({
           <SurveyForm
             items={items}
             action={action}
-            text={{ next: text.next, sending: text.sending }}
+            text={{ next: text.next, sending: text.sending, missing: text.missing }}
             hidden={{ shown_at: clock.startIso, duration_ms: String(elapsedMs) }}
           />
         </>
