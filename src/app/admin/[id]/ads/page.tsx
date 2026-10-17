@@ -29,7 +29,7 @@ function AdForm({ experimentId, a, d }: { experimentId: string; a?: Ad; d: Dict[
           <input name="brand_name" defaultValue={a?.brand_name ?? ""} className={input} />
         </Field>
         <Field name="product_category" title={d.productCategory}>
-          <input name="product_category" defaultValue={a?.product_category ?? ""} className={input} placeholder="hedonic / utilitarian" />
+          <input name="product_category" defaultValue={a?.product_category ?? ""} className={input} placeholder="outerwear / basics" />
         </Field>
       </div>
       <Field name="headline" title={d.headline}>

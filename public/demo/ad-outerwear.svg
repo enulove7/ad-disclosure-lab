@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <rect width="1080" height="1080" fill="#e7e5e4"/>
+  <rect x="340" y="200" width="400" height="680" rx="24" fill="#d6d3d1"/>
+  <text x="540" y="560" font-family="sans-serif" font-size="40" text-anchor="middle" fill="#78716c">AI 画像を生成してください</text>
+  <text x="540" y="620" font-family="sans-serif" font-size="28" text-anchor="middle" fill="#a8a29e">管理画面 › 広告 › AIで画像を生成</text>
+</svg>

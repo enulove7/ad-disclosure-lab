@@ -26,29 +26,35 @@ Midjourney(v7 이상), Google Imagen / Gemini 이미지 생성, OpenAI GPT 이�
 
 ## 프롬프트
 
-### 1. 화장품 세럼 (쾌락적)
+연구 대상이 **대중 패션 브랜드**이므로 가상 브랜드 "LOAM"(앱 프리셋)을 쓴다. 패션 AI 광고의 쟁점은 AI 생성 모델(인물)이라,
+이미지는 모델이 옷을 입은 캠페인 컷으로 만든다. 인물 이미지는 AI 흔적(손가락, 치아, 귀걸이 좌우, 옷 봉제선)이 나오기 쉬우므로 후보를 넉넉히 뽑는다.
+
+### 1. 아우터 (트렌치코트)
 
 ```
-Professional cosmetic advertising photograph of a single frosted glass serum bottle with a dropper cap,
-no label, no text, standing on a wet pale stone surface with soft morning sunlight from the left,
-dewy water droplets, shallow depth of field, blurred warm beige background, soft shadows,
-shot on a Hasselblad medium format camera, 85mm lens, f/2.8, studio product photography,
-high-end skincare campaign, muted pastel palette, square 1:1
+Fashion campaign photograph for a mass-market apparel brand: a Japanese woman in her mid 20s wearing
+a beige oversized trench coat over a white t-shirt and straight light-blue jeans, walking on a quiet
+Tokyo backstreet in soft overcast daylight, natural relaxed expression, candid editorial style,
+full body, shot on 50mm lens, f/2.8, muted natural colors, realistic skin texture.
+No text, no letters, no logo, no watermark, no visible brand marks.
 ```
 
-변형 아이디어: 병 옆에 흰 꽃잎 한두 장 / 반투명 커튼 그림자 / 손등에 세럼 한 방울 떨어뜨리는 손(여성, 20~30대 동아시아인).
-
-### 2. 자동차보험 (실용적)
+### 2. 베이직 (스웨트셔츠)
 
 ```
-Editorial lifestyle photograph for an insurance campaign: a Japanese father in his late 30s and
-a young daughter smiling while loading a small suitcase into the trunk of a clean modern silver
-compact SUV, suburban residential street, soft overcast daylight, natural skin tones,
-candid moment, documentary advertising style, shot on Canon EOS R5, 35mm lens, f/4,
-no text, no logos, no license plate visible, square 1:1
+Fashion campaign photograph for a mass-market apparel brand: a Japanese man in his late 20s wearing
+a plain heather-grey crewneck sweatshirt and black tapered chino pants, standing against a sunlit
+concrete wall, three-quarter body, slight smile, clean minimal composition, soft directional
+afternoon light, shot on 85mm lens, f/2.0, realistic skin and fabric texture.
+No text, no letters, no logo, no watermark, no visible brand marks.
 ```
 
-변형 아이디어: 비 오는 날 차 안에서 안도하는 운전자 / 밤에 주차장에서 전화 통화하는 운전자(사고 대응 이미지) / 가족이 차 앞에서 떠나기 직전.
+변형 아이디어: 인물 없이 옷만(행거·플랫레이) / 스튜디오 흰 배경 룩북 컷 / 두 명 이상 그룹 컷.
+"인물 있음 vs 없음"은 패션 AI 광고 연구에서 그 자체로 조절변수가 될 수 있다(AI 생성 인물에 대한 거부감).
+
+### 참고: 다른 카테고리 예시
+
+화장품(세럼 병 제품 사진), 자동차보험(가족이 차에 짐 싣는 장면) 프롬프트는 git 이력의 이전 버전 `src/lib/presets.ts` 에 있다.
 
 ### 부정 프롬프트 (지원 도구에서)
 

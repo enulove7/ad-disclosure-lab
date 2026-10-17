@@ -65,30 +65,41 @@ const CONDITION_PRESETS_JA: Array<Omit<Condition, "id" | "experiment_id">> = [
   },
 ];
 
+/**
+ * 가상의 대중 패션 브랜드 "LOAM". 실제 브랜드와 겹치지 않는지 사용 전 확인할 것.
+ * 패션 AI 광고의 쟁점은 AI 생성 모델(인물)이므로, 이미지는 모델이 옷을 입은 캠페인 컷으로 잡는다.
+ */
+const PROMPT_OUTERWEAR_JA =
+  "Fashion campaign photograph for a mass-market apparel brand: a Japanese woman in her mid 20s wearing a beige oversized trench coat over a white t-shirt and straight light-blue jeans, walking on a quiet Tokyo backstreet in soft overcast daylight, natural relaxed expression, candid editorial style, full body, shot on 50mm lens, f/2.8, muted natural colors, realistic skin texture. No text, no letters, no logo, no watermark, no visible brand marks.";
+const PROMPT_BASICS_JA =
+  "Fashion campaign photograph for a mass-market apparel brand: a Japanese man in his late 20s wearing a plain heather-grey crewneck sweatshirt and black tapered chino pants, standing against a sunlit concrete wall, three-quarter body, slight smile, clean minimal composition, soft directional afternoon light, shot on 85mm lens, f/2.0, realistic skin and fabric texture. No text, no letters, no logo, no watermark, no visible brand marks.";
+const PROMPT_OUTERWEAR_KO = PROMPT_OUTERWEAR_JA.replace("a Japanese woman", "a Korean woman").replace("Tokyo backstreet", "Seoul backstreet");
+const PROMPT_BASICS_KO = PROMPT_BASICS_JA.replace("a Japanese man", "a Korean man");
+
 const AD_PRESETS_JA: Array<Omit<Ad, "id" | "experiment_id">> = [
   {
-    code: "AD_HEDONIC",
-    name: "化粧品（快楽的）",
-    brand_name: "LUMIÈRE",
-    product_category: "hedonic",
-    headline: "朝の光を、肌にまとう。",
-    body_text: "新しい美容液「LUMIÈRE セラム」。一滴で、透明感のある一日がはじまる。",
+    code: "AD_OUTER",
+    name: "アウター（トレンチコート）",
+    brand_name: "LOAM",
+    product_category: "outerwear",
+    headline: "春の定番、新しく。",
+    body_text: "軽くて動きやすいオーバーサイズトレンチ。¥9,990",
     cta_text: "詳しく見る",
-    image_url: "/demo/ad-hedonic.svg",
-    gen_prompt: "Professional cosmetic advertising photograph of a single frosted glass serum bottle with a dropper cap, no label, no text, standing on a wet pale stone surface with soft morning sunlight from the left, dewy water droplets, shallow depth of field, blurred warm beige background, soft shadows, shot on a medium format camera, 85mm lens, f/2.8, studio product photography, high-end skincare campaign, muted pastel palette. No text, no letters, no logo, no watermark.",
+    image_url: "/demo/ad-outerwear.svg",
+    gen_prompt: PROMPT_OUTERWEAR_JA,
     gen_model: "",
     sort_order: 0,
   },
   {
-    code: "AD_UTIL",
-    name: "自動車保険（実用的）",
-    brand_name: "セーフドライブ保険",
-    product_category: "utilitarian",
-    headline: "もしもの時も、月々1,980円から。",
-    body_text: "事故対応24時間365日。ネット申込で最大20%割引。",
-    cta_text: "見積もりをとる",
-    image_url: "/demo/ad-utilitarian.svg",
-    gen_prompt: "Editorial lifestyle photograph for a car insurance campaign: a Japanese father in his late 30s and his young daughter smiling while loading a small suitcase into the trunk of a clean modern silver compact SUV, quiet suburban residential street in Japan, soft overcast daylight, natural skin tones, candid moment, documentary advertising style, 35mm lens, f/4. No text, no logos, no license plate visible.",
+    code: "AD_BASIC",
+    name: "ベーシック（スウェット）",
+    brand_name: "LOAM",
+    product_category: "basics",
+    headline: "毎日着たい、ちょうどいい。",
+    body_text: "肌ざわりのいいクルーネックスウェット。全6色 ¥3,990",
+    cta_text: "詳しく見る",
+    image_url: "/demo/ad-basics.svg",
+    gen_prompt: PROMPT_BASICS_JA,
     gen_model: "",
     sort_order: 1,
   },
@@ -253,28 +264,28 @@ const CONDITION_PRESETS_KO: Array<Omit<Condition, "id" | "experiment_id">> = [
 
 const AD_PRESETS_KO: Array<Omit<Ad, "id" | "experiment_id">> = [
   {
-    code: "AD_HEDONIC",
-    name: "화장품 (쾌락적)",
-    brand_name: "LUMIÈRE",
-    product_category: "hedonic",
-    headline: "아침 햇살을 피부에 담다.",
-    body_text: "새로운 세럼 「LUMIÈRE 세럼」. 한 방울로 시작하는 투명한 하루.",
+    code: "AD_OUTER",
+    name: "아우터 (트렌치코트)",
+    brand_name: "LOAM",
+    product_category: "outerwear",
+    headline: "봄의 기본, 새롭게.",
+    body_text: "가볍고 활동적인 오버사이즈 트렌치. 99,000원",
     cta_text: "자세히 보기",
-    image_url: "/demo/ad-hedonic.svg",
-    gen_prompt: "Professional cosmetic advertising photograph of a single frosted glass serum bottle with a dropper cap, no label, no text, standing on a wet pale stone surface with soft morning sunlight from the left, dewy water droplets, shallow depth of field, blurred warm beige background, soft shadows, shot on a medium format camera, 85mm lens, f/2.8, studio product photography, high-end skincare campaign, muted pastel palette. No text, no letters, no logo, no watermark.",
+    image_url: "/demo/ad-outerwear.svg",
+    gen_prompt: PROMPT_OUTERWEAR_KO,
     gen_model: "",
     sort_order: 0,
   },
   {
-    code: "AD_UTIL",
-    name: "자동차보험 (실용적)",
-    brand_name: "세이프드라이브 보험",
-    product_category: "utilitarian",
-    headline: "만약의 순간에도, 월 19,800원부터.",
-    body_text: "사고 접수 24시간 365일. 온라인 가입 시 최대 20% 할인.",
-    cta_text: "견적 받기",
-    image_url: "/demo/ad-utilitarian-ko.svg",
-    gen_prompt: "Editorial lifestyle photograph for a car insurance campaign: a Korean father in his late 30s and his young daughter smiling while loading a small suitcase into the trunk of a clean modern silver compact SUV, quiet suburban residential street in Korea, soft overcast daylight, natural skin tones, candid moment, documentary advertising style, 35mm lens, f/4. No text, no logos, no license plate visible.",
+    code: "AD_BASIC",
+    name: "베이직 (스웨트셔츠)",
+    brand_name: "LOAM",
+    product_category: "basics",
+    headline: "매일 입고 싶은, 딱 좋은.",
+    body_text: "부드러운 크루넥 스웨트셔츠. 6색 39,000원",
+    cta_text: "자세히 보기",
+    image_url: "/demo/ad-basics.svg",
+    gen_prompt: PROMPT_BASICS_KO,
     gen_model: "",
     sort_order: 1,
   },
