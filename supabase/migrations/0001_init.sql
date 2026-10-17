@@ -37,9 +37,23 @@ create table if not exists ads (
   body_text text not null default '',
   cta_text text not null default '',
   image_url text not null default '',
+  gen_prompt text not null default '',
+  gen_model text not null default '',
   sort_order integer not null default 0,
   unique (experiment_id, code)
 );
+
+-- AI 로 생성한 광고 이미지 후보
+create table if not exists ad_images (
+  id uuid primary key default gen_random_uuid(),
+  experiment_id uuid not null references experiments(id) on delete cascade,
+  ad_id uuid not null references ads(id) on delete cascade,
+  image_url text not null,
+  prompt text not null default '',
+  model text not null default '',
+  created_at timestamptz not null default now()
+);
+create index if not exists ad_images_ad_idx on ad_images(ad_id);
 
 create table if not exists survey_items (
   id uuid primary key default gen_random_uuid(),
@@ -98,6 +112,7 @@ alter table experiments enable row level security;
 alter table conditions enable row level security;
 alter table ads enable row level security;
 alter table survey_items enable row level security;
+alter table ad_images enable row level security;
 alter table participants enable row level security;
 alter table exposures enable row level security;
 alter table responses enable row level security;

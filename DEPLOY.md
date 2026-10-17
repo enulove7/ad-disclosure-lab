@@ -33,6 +33,7 @@
    | `ADMIN_PASSWORD` | 관리자 화면 비밀번호 (직접 정함) |
    | `SUPABASE_URL` | 1-5 에서 복사한 Project URL |
    | `SUPABASE_SERVICE_ROLE_KEY` | 1-5 에서 복사한 service_role 키 |
+   | `GEMINI_API_KEY` | (선택) Google AI Studio 키. AI 이미지 생성에 사용 |
 
 5. **Deploy** → 2~3분 기다림 → "Congratulations" 화면에서 도메인 확인 (예: `ad-disclosure-lab.vercel.app`).
 

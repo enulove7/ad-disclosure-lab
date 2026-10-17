@@ -6,7 +6,9 @@ import type { Dict } from "@/lib/i18n";
 import { SaveForm } from "@/components/admin/SaveForm";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { btn, btnDanger, Card, Field, input, Tabs } from "@/components/admin/ui";
-import { deleteAdAction, saveAdAction } from "../../actions";
+import { deleteAdAction, deleteAdImageAction, generateAdImageAction, saveAdAction, useAdImageAction } from "../../actions";
+import { ImageGenPanel } from "@/components/admin/ImageGenPanel";
+import { defaultImageModel, IMAGE_MODELS, imageGenAvailable } from "@/lib/imagegen";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +59,10 @@ export default async function AdsPage(props: PageProps<"/admin/[id]/ads">) {
   const store = getStore();
   const exp = await store.getExperiment(id);
   if (!exp) notFound();
-  const ads = await store.listAds(id);
+  const [ads, images] = await Promise.all([store.listAds(id), store.listAdImages(id)]);
+  const available = imageGenAvailable();
+  const models = IMAGE_MODELS;
+  const defaultModel = defaultImageModel();
 
   return (
     <div className="space-y-6">
@@ -82,6 +87,17 @@ export default async function AdsPage(props: PageProps<"/admin/[id]/ads">) {
             </div>
             <AdForm experimentId={id} a={a} d={d} />
           </div>
+          <ImageGenPanel
+            ad={a}
+            candidates={images.filter((x) => x.ad_id === a.id)}
+            models={models}
+            defaultModel={defaultModel}
+            available={available}
+            d={d}
+            generateAction={generateAdImageAction.bind(null, id, a.id)}
+            adoptAction={(imageId) => useAdImageAction.bind(null, id, a.id, imageId)}
+            deleteAction={(imageId) => deleteAdImageAction.bind(null, id, imageId)}
+          />
         </Card>
       ))}
       <Card title={d.addAd}>

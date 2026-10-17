@@ -52,9 +52,15 @@ src/
   lib/presets.ts        C0~C3 조건, 데모 광고, 기본 설문 세트(일본어·한국어)
   lib/i18n.ts           화면 고정 문구 사전(ja / ko)
   lib/export.ts         long / wide CSV 생성
+  lib/imagegen.ts       Gemini 이미지 생성 어댑터 (+ mock)
+docs/stimuli.md         실험 자극물(광고 이미지) 제작 가이드와 프롬프트
 supabase/migrations/    DB 스키마
 scripts/e2e/flow.mjs    Playwright 스모크 테스트(관리자 생성 → 참가자 5명 완주 → CSV 확인)
 ```
+
+## AI 이미지 생성
+
+관리자 광고 탭에서 프롬프트로 광고 이미지를 생성하고 후보 중 하나를 채택할 수 있다. 환경변수 `GEMINI_API_KEY` 가 필요하며, Google 이미지 모델은 결제 연결이 된 키에서만 동작한다. 자세한 내용은 [docs/stimuli.md](./docs/stimuli.md).
 
 ## 데이터 모델
 
@@ -62,7 +68,8 @@ scripts/e2e/flow.mjs    Playwright 스모크 테스트(관리자 생성 → 참�
 |---|---|
 | experiments | 실험 단위. 동의문·디브리핑·설정(최소 노출 시간, 배정 방식 등) |
 | conditions | 공개 라벨 조건. `label_config`(enabled/text/description/position/size/style/show_icon) |
-| ads | 광고 소재. 가상 브랜드, 문구, 이미지, 제품 카테고리 |
+| ads | 광고 소재. 가상 브랜드, 문구, 이미지, 제품 카테고리, 채택 이미지의 생성 프롬프트·모델 |
+| ad_images | AI 로 생성한 광고 이미지 후보 (프롬프트·모델·URL) |
 | survey_items | 설문 문항. phase = pre / post_ad / final, construct = 분석용 구성개념 |
 | participants | 참가자. 조건 배정 결과, 상태, 시작·완료 시각 |
 | exposures | 참가자 × 광고 노출. 순서, 노출 시각, 노출 시간(ms), 라벨 스냅샷 |

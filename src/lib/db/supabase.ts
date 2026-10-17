@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Store } from "./store";
 import type {
   Ad,
+  AdImage,
   Condition,
   Experiment,
   Exposure,
@@ -80,6 +81,10 @@ export function createSupabaseStore(url: string, serviceKey: string): Store {
     createAd: (d) => insertOne<Ad>("ads", d),
     updateAd: (id, p) => updateOne<Ad>("ads", id, p),
     deleteAd: (id) => remove("ads", id),
+
+    listAdImages: (eid) => list<AdImage>("ad_images", { experiment_id: eid }, "created_at").then((r) => r.reverse()),
+    createAdImage: (d) => insertOne<AdImage>("ad_images", d),
+    deleteAdImage: (id) => remove("ad_images", id),
 
     listItems: (eid) => list<SurveyItem>("survey_items", { experiment_id: eid }),
     createItem: (d) => insertOne<SurveyItem>("survey_items", d),

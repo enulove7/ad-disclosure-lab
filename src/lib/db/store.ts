@@ -1,5 +1,6 @@
 import type {
   Ad,
+  AdImage,
   Condition,
   Experiment,
   Exposure,
@@ -29,6 +30,11 @@ export interface Store {
   createAd(data: Omit<Ad, "id">): Promise<Ad>;
   updateAd(id: string, patch: Partial<Ad>): Promise<Ad>;
   deleteAd(id: string): Promise<void>;
+
+  // ad images (AI 생성 후보)
+  listAdImages(experimentId: string): Promise<AdImage[]>;
+  createAdImage(data: Omit<AdImage, "id" | "created_at">): Promise<AdImage>;
+  deleteAdImage(id: string): Promise<void>;
 
   // survey items
   listItems(experimentId: string): Promise<SurveyItem[]>;

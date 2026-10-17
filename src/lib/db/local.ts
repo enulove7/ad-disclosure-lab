@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import type { Store } from "./store";
 import type {
   Ad,
+  AdImage,
   Condition,
   Experiment,
   Exposure,
@@ -20,6 +21,7 @@ interface DbShape {
   experiments: Experiment[];
   conditions: Condition[];
   ads: Ad[];
+  ad_images: AdImage[];
   survey_items: SurveyItem[];
   participants: Participant[];
   exposures: Exposure[];
@@ -30,6 +32,7 @@ const EMPTY: DbShape = {
   experiments: [],
   conditions: [],
   ads: [],
+  ad_images: [],
   survey_items: [],
   participants: [],
   exposures: [],
@@ -116,6 +119,7 @@ export const localStore: Store = {
       db.exposures = db.exposures.filter((x) => !pids.has(x.participant_id));
       db.participants = db.participants.filter((p) => p.experiment_id !== id);
       db.survey_items = db.survey_items.filter((i) => i.experiment_id !== id);
+      db.ad_images = db.ad_images.filter((x) => x.experiment_id !== id);
       db.ads = db.ads.filter((a) => a.experiment_id !== id);
       db.conditions = db.conditions.filter((c) => c.experiment_id !== id);
       db.experiments = db.experiments.filter((e) => e.id !== id);
@@ -159,6 +163,26 @@ export const localStore: Store = {
   deleteAd(id) {
     return mutate((db) => {
       db.ads = db.ads.filter((a) => a.id !== id);
+      db.ad_images = db.ad_images.filter((x) => x.ad_id !== id);
+    });
+  },
+
+  async listAdImages(experimentId) {
+    const db = await readDb();
+    return db.ad_images
+      .filter((x) => x.experiment_id === experimentId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  },
+  createAdImage(data) {
+    return mutate((db) => {
+      const row: AdImage = { ...data, id: randomUUID(), created_at: new Date().toISOString() };
+      db.ad_images.push(row);
+      return row;
+    });
+  },
+  deleteAdImage(id) {
+    return mutate((db) => {
+      db.ad_images = db.ad_images.filter((x) => x.id !== id);
     });
   },
 

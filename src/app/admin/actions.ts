@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { getStore } from "@/lib/db";
 import { ADMIN_COOKIE, adminSessionValue, checkPassword, requireAdmin } from "@/lib/auth";
 import { getPresets } from "@/lib/presets";
+import { defaultImageModel, generateImage, IMAGE_MODELS } from "@/lib/imagegen";
 import { asLocale, LOCALES, type Locale } from "@/lib/i18n";
 import { ADMIN_LOCALE_COOKIE, adminDict } from "@/lib/i18n-server";
 import {
@@ -201,10 +202,69 @@ export async function saveAdAction(experimentId: string, _prev: FormState, form:
     image_url,
     sort_order: num(form, "sort_order", 0),
   };
-  if (id) await store.updateAd(id, data);
-  else await store.createAd(data);
+  if (id) {
+    // 이미지가 직접 바뀌면 AI 생성 정보는 더 이상 유효하지 않다
+    const prev = (await store.listAds(experimentId)).find((a) => a.id === id);
+    const changed = prev && prev.image_url !== image_url;
+    await store.updateAd(id, changed ? { ...data, gen_prompt: "", gen_model: "" } : data);
+  } else {
+    await store.createAd({ ...data, gen_prompt: "", gen_model: "" });
+  }
   revalidatePath(`/admin/${experimentId}/ads`);
   return { ok: true };
+}
+
+// ---------- AI 이미지 생성 ----------
+export async function generateAdImageAction(
+  experimentId: string,
+  adId: string,
+  _prev: FormState,
+  form: FormData,
+): Promise<FormState> {
+  await requireAdmin();
+  const { d } = await adminDict();
+  const store = getStore();
+  const prompt = str(form, "prompt").trim();
+  if (!prompt) return { error: d.promptRequired };
+  const requested = str(form, "model", defaultImageModel());
+  const model = IMAGE_MODELS.some((m) => m.id === requested) ? requested : defaultImageModel();
+  const count = Math.min(4, Math.max(1, num(form, "count", 1)));
+
+  const ad = (await store.listAds(experimentId)).find((a) => a.id === adId);
+  if (!ad) return { error: "ad not found" };
+
+  const errors: string[] = [];
+  for (let i = 0; i < count; i++) {
+    try {
+      const img = await generateImage(prompt, model);
+      const ext = img.mime.includes("jpeg") ? "jpg" : "png";
+      const file = new File([new Uint8Array(img.bytes)], `${ad.code}-${Date.now()}-${i}.${ext}`, { type: img.mime });
+      const url = await store.uploadImage(file, file.name);
+      await store.createAdImage({ experiment_id: experimentId, ad_id: adId, image_url: url, prompt, model: img.model });
+    } catch (e) {
+      errors.push(e instanceof Error ? e.message : String(e));
+      break;
+    }
+  }
+  revalidatePath(`/admin/${experimentId}/ads`);
+  if (errors.length) return { error: errors[0] };
+  return { ok: true };
+}
+
+/** 후보 이미지를 광고에 채택 */
+export async function useAdImageAction(experimentId: string, adId: string, imageId: string) {
+  await requireAdmin();
+  const store = getStore();
+  const img = (await store.listAdImages(experimentId)).find((x) => x.id === imageId && x.ad_id === adId);
+  if (!img) return;
+  await store.updateAd(adId, { image_url: img.image_url, gen_prompt: img.prompt, gen_model: img.model });
+  revalidatePath(`/admin/${experimentId}/ads`);
+}
+
+export async function deleteAdImageAction(experimentId: string, imageId: string) {
+  await requireAdmin();
+  await getStore().deleteAdImage(imageId);
+  revalidatePath(`/admin/${experimentId}/ads`);
 }
 
 export async function deleteAdAction(experimentId: string, id: string) {

@@ -72,7 +72,21 @@ export interface Ad {
   body_text: string;
   cta_text: string;
   image_url: string;
+  /** 채택된 이미지를 만든 프롬프트·모델 (AI 생성 시) */
+  gen_prompt: string;
+  gen_model: string;
   sort_order: number;
+}
+
+/** AI 로 생성한 광고 이미지 후보 */
+export interface AdImage {
+  id: string;
+  experiment_id: string;
+  ad_id: string;
+  image_url: string;
+  prompt: string;
+  model: string;
+  created_at: string;
 }
 
 export type SurveyPhase = "pre" | "post_ad" | "final";

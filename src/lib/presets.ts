@@ -75,6 +75,8 @@ const AD_PRESETS_JA: Array<Omit<Ad, "id" | "experiment_id">> = [
     body_text: "新しい美容液「LUMIÈRE セラム」。一滴で、透明感のある一日がはじまる。",
     cta_text: "詳しく見る",
     image_url: "/demo/ad-hedonic.svg",
+    gen_prompt: "Professional cosmetic advertising photograph of a single frosted glass serum bottle with a dropper cap, no label, no text, standing on a wet pale stone surface with soft morning sunlight from the left, dewy water droplets, shallow depth of field, blurred warm beige background, soft shadows, shot on a medium format camera, 85mm lens, f/2.8, studio product photography, high-end skincare campaign, muted pastel palette. No text, no letters, no logo, no watermark.",
+    gen_model: "",
     sort_order: 0,
   },
   {
@@ -86,6 +88,8 @@ const AD_PRESETS_JA: Array<Omit<Ad, "id" | "experiment_id">> = [
     body_text: "事故対応24時間365日。ネット申込で最大20%割引。",
     cta_text: "見積もりをとる",
     image_url: "/demo/ad-utilitarian.svg",
+    gen_prompt: "Editorial lifestyle photograph for a car insurance campaign: a Japanese father in his late 30s and his young daughter smiling while loading a small suitcase into the trunk of a clean modern silver compact SUV, quiet suburban residential street in Japan, soft overcast daylight, natural skin tones, candid moment, documentary advertising style, 35mm lens, f/4. No text, no logos, no license plate visible.",
+    gen_model: "",
     sort_order: 1,
   },
 ];
@@ -257,6 +261,8 @@ const AD_PRESETS_KO: Array<Omit<Ad, "id" | "experiment_id">> = [
     body_text: "새로운 세럼 「LUMIÈRE 세럼」. 한 방울로 시작하는 투명한 하루.",
     cta_text: "자세히 보기",
     image_url: "/demo/ad-hedonic.svg",
+    gen_prompt: "Professional cosmetic advertising photograph of a single frosted glass serum bottle with a dropper cap, no label, no text, standing on a wet pale stone surface with soft morning sunlight from the left, dewy water droplets, shallow depth of field, blurred warm beige background, soft shadows, shot on a medium format camera, 85mm lens, f/2.8, studio product photography, high-end skincare campaign, muted pastel palette. No text, no letters, no logo, no watermark.",
+    gen_model: "",
     sort_order: 0,
   },
   {
@@ -268,6 +274,8 @@ const AD_PRESETS_KO: Array<Omit<Ad, "id" | "experiment_id">> = [
     body_text: "사고 접수 24시간 365일. 온라인 가입 시 최대 20% 할인.",
     cta_text: "견적 받기",
     image_url: "/demo/ad-utilitarian-ko.svg",
+    gen_prompt: "Editorial lifestyle photograph for a car insurance campaign: a Korean father in his late 30s and his young daughter smiling while loading a small suitcase into the trunk of a clean modern silver compact SUV, quiet suburban residential street in Korea, soft overcast daylight, natural skin tones, candid moment, documentary advertising style, 35mm lens, f/4. No text, no logos, no license plate visible.",
+    gen_model: "",
     sort_order: 1,
   },
 ];
