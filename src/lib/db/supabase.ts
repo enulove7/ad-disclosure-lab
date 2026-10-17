@@ -103,6 +103,12 @@ export function createSupabaseStore(url: string, serviceKey: string): Store {
     },
     createParticipant: (d) => insertOne<Participant>("participants", d),
     updateParticipant: (id, p) => updateOne<Participant>("participants", id, p),
+    deleteParticipant: (id) => remove("participants", id),
+    async deleteParticipantsByExperiment(eid) {
+      const { data, error } = await sb.from("participants").delete().eq("experiment_id", eid).select("id");
+      if (error) throw new Error(error.message);
+      return (data ?? []).length;
+    },
     async countParticipantsByCondition(eid) {
       const rows = unwrap<{ condition_id: string }[]>(
         await sb.from("participants").select("condition_id").eq("experiment_id", eid),

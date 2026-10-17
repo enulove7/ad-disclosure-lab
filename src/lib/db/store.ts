@@ -52,6 +52,9 @@ export interface Store {
   createParticipant(data: Omit<Participant, "id">): Promise<Participant>;
   updateParticipant(id: string, patch: Partial<Participant>): Promise<Participant>;
   countParticipantsByCondition(experimentId: string): Promise<Record<string, number>>;
+  /** 참가자와 그 노출·응답을 함께 삭제 */
+  deleteParticipant(id: string): Promise<void>;
+  deleteParticipantsByExperiment(experimentId: string): Promise<number>;
 
   // exposures
   createExposures(data: Omit<Exposure, "id">[]): Promise<Exposure[]>;

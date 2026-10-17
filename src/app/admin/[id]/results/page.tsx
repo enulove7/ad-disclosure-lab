@@ -151,7 +151,7 @@ export default async function ResultsPage(props: PageProps<"/admin/[id]/results"
         </Card>
       </div>
 
-      {s.constructs.length === 0 && (
+      {(s.constructs.length === 0 || (includeAll ? participants.length : completed) === 0) && (
         <Card>
           <p className="text-sm text-neutral-600">{d.resNoData}</p>
         </Card>

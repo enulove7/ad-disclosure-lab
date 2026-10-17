@@ -145,6 +145,19 @@ export async function deleteExperimentAction(id: string) {
   redirect("/admin");
 }
 
+// ---------- 참가자 ----------
+export async function deleteParticipantAction(experimentId: string, id: string) {
+  await requireAdmin();
+  await getStore().deleteParticipant(id);
+  revalidatePath(`/admin/${experimentId}/participants`);
+}
+
+export async function deleteAllParticipantsAction(experimentId: string) {
+  await requireAdmin();
+  await getStore().deleteParticipantsByExperiment(experimentId);
+  revalidatePath(`/admin/${experimentId}/participants`);
+}
+
 // ---------- 조건 ----------
 function parseLabel(form: FormData): LabelConfig {
   return {

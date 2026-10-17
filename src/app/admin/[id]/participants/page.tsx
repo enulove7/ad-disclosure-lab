@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { getStore } from "@/lib/db";
 import { adminDict } from "@/lib/i18n-server";
-import { Tabs } from "@/components/admin/ui";
+import { btnDanger, Tabs } from "@/components/admin/ui";
+import { ConfirmButton } from "@/components/admin/ConfirmButton";
+import { deleteAllParticipantsAction, deleteParticipantAction } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,14 @@ export default async function ParticipantsPage(props: PageProps<"/admin/[id]/par
   return (
     <div className="space-y-4">
       <Tabs id={id} active="participants" d={d} />
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-neutral-600">{d.participantsCount(participants.length)}</p>
+        {participants.length > 0 && (
+          <ConfirmButton action={deleteAllParticipantsAction.bind(null, id)} message={d.deleteAllParticipantsConfirm(participants.length)} className={btnDanger}>
+            {d.deleteAllParticipants}
+          </ConfirmButton>
+        )}
+      </div>
       <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         <table className="w-full text-left text-sm">
           <thead className="bg-neutral-50 text-xs text-neutral-500">
@@ -33,6 +43,7 @@ export default async function ParticipantsPage(props: PageProps<"/admin/[id]/par
               <th className="px-3 py-2">{d.colStarted}</th>
               <th className="px-3 py-2">{d.colCompleted}</th>
               <th className="px-3 py-2">{d.colDuration}</th>
+              <th className="px-3 py-2"></th>
             </tr>
           </thead>
           <tbody>
@@ -54,12 +65,17 @@ export default async function ParticipantsPage(props: PageProps<"/admin/[id]/par
                   <td className="px-3 py-2 text-xs">{fmt(p.started_at)}</td>
                   <td className="px-3 py-2 text-xs">{p.completed_at ? fmt(p.completed_at) : "—"}</td>
                   <td className="px-3 py-2 tabular-nums">{secs || "—"}</td>
+                  <td className="px-3 py-2">
+                    <ConfirmButton action={deleteParticipantAction.bind(null, id, p.id)} message={d.deleteParticipantConfirm} className={`${btnDanger} px-2 py-1 text-xs`}>
+                      {d.delete}
+                    </ConfirmButton>
+                  </td>
                 </tr>
               );
             })}
             {participants.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-3 py-6 text-center text-neutral-500">
+                <td colSpan={8} className="px-3 py-6 text-center text-neutral-500">
                   {d.noParticipants}
                 </td>
               </tr>

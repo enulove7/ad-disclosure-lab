@@ -238,6 +238,22 @@ export const localStore: Store = {
   updateParticipant(id, patch) {
     return mutate((db) => patchRow(db.participants, id, patch));
   },
+  deleteParticipant(id) {
+    return mutate((db) => {
+      db.responses = db.responses.filter((r) => r.participant_id !== id);
+      db.exposures = db.exposures.filter((x) => x.participant_id !== id);
+      db.participants = db.participants.filter((p) => p.id !== id);
+    });
+  },
+  deleteParticipantsByExperiment(experimentId) {
+    return mutate((db) => {
+      const ids = new Set(db.participants.filter((p) => p.experiment_id === experimentId).map((p) => p.id));
+      db.responses = db.responses.filter((r) => !ids.has(r.participant_id));
+      db.exposures = db.exposures.filter((x) => !ids.has(x.participant_id));
+      db.participants = db.participants.filter((p) => !ids.has(p.id));
+      return ids.size;
+    });
+  },
   async countParticipantsByCondition(experimentId) {
     const db = await readDb();
     const counts: Record<string, number> = {};
