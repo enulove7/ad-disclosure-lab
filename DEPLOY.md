@@ -11,8 +11,9 @@
    - Region: **Northeast Asia (Tokyo)** 선택 (일본 참가자 기준 가장 빠름)
    - Create new project → 1~2분 기다림.
 3. 왼쪽 메뉴 **SQL Editor** → **New query**.
-4. 이 저장소의 `supabase/migrations/0001_init.sql` 파일 내용을 전부 복사해 붙여넣고 **Run**.
+4. 이 저장소의 `supabase/migrations/` 안의 SQL 파일을 번호 순서대로(0001, 0002, …) 하나씩 복사해 붙여넣고 **Run**.
    "Success. No rows returned" 가 나오면 성공. 왼쪽 **Table Editor**에 experiments, conditions 등 7개 테이블이 보이면 된다.
+   나중에 새 번호의 SQL 파일이 추가되면 그 파일만 같은 방법으로 실행하면 된다.
 5. 왼쪽 메뉴 **Project Settings** (톱니바퀴) → **API** 에서 두 값을 복사:
    - **Project URL** → `SUPABASE_URL`
    - **service_role** 키 (Reveal 눌러서) → `SUPABASE_SERVICE_ROLE_KEY`

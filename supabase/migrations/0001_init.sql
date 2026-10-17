@@ -60,7 +60,7 @@ create table if not exists survey_items (
 create table if not exists participants (
   id uuid primary key default gen_random_uuid(),
   experiment_id uuid not null references experiments(id) on delete cascade,
-  condition_id uuid not null references conditions(id),
+  condition_id uuid not null references conditions(id) on delete cascade,
   token text not null unique,
   status text not null default 'started'
     check (status in ('started','pre_done','ads_done','completed','dropped')),
@@ -73,8 +73,8 @@ create index if not exists participants_experiment_idx on participants(experimen
 create table if not exists exposures (
   id uuid primary key default gen_random_uuid(),
   participant_id uuid not null references participants(id) on delete cascade,
-  ad_id uuid not null references ads(id),
-  condition_id uuid not null references conditions(id),
+  ad_id uuid not null references ads(id) on delete cascade,
+  condition_id uuid not null references conditions(id) on delete cascade,
   sort_order integer not null default 0,
   label_snapshot jsonb not null default '{}'::jsonb,
   shown_at timestamptz,
@@ -86,7 +86,7 @@ create table if not exists responses (
   id uuid primary key default gen_random_uuid(),
   participant_id uuid not null references participants(id) on delete cascade,
   exposure_id uuid references exposures(id) on delete cascade,
-  item_id uuid not null references survey_items(id),
+  item_id uuid not null references survey_items(id) on delete cascade,
   phase text not null check (phase in ('pre','post_ad','final')),
   value jsonb,
   answered_at timestamptz not null default now()

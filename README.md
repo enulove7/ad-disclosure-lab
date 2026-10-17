@@ -19,7 +19,7 @@ npm run dev
 
 ## Supabase로 전환
 
-1. Supabase 프로젝트 생성 → SQL Editor에서 `supabase/migrations/0001_init.sql` 실행.
+1. Supabase 프로젝트 생성 → SQL Editor에서 `supabase/migrations/` 의 SQL 파일을 번호 순서대로 실행.
 2. `.env.local`에 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` 추가.
 3. 재시작하면 관리자 화면 오른쪽 위 배지가 `Supabase`로 바뀐다.
 
