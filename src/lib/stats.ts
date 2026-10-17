@@ -36,6 +36,8 @@ export interface ResultsSummary {
   constructs: ConstructResult[];
   distributions: OptionDist[];
   exposureSeconds: Record<string, { n: number; mean: number }>;
+  /** 조건별 CTA 클릭률 (노출 단위) */
+  cta: Record<string, { n: number; clicked: number }>;
 }
 
 function meanSd(xs: number[]): { mean: number; sd: number } {
@@ -186,5 +188,12 @@ export function summarize(input: {
     exposureSeconds[c.id] = { n: secs.length, mean: meanSd(secs).mean };
   }
 
-  return { participants: { byCondition }, attention, constructs, distributions, exposureSeconds };
+  // CTA 클릭률
+  const cta: Record<string, { n: number; clicked: number }> = {};
+  for (const c of conditions) {
+    const xs = exposures.filter((x) => x.condition_id === c.id && x.duration_ms !== null && pById.has(x.participant_id));
+    cta[c.id] = { n: xs.length, clicked: xs.filter((x) => x.cta_clicked_at).length };
+  }
+
+  return { participants: { byCondition }, attention, constructs, distributions, exposureSeconds, cta };
 }

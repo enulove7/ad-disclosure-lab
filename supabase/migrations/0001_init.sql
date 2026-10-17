@@ -79,10 +79,14 @@ create table if not exists participants (
   status text not null default 'started'
     check (status in ('started','pre_done','ads_done','completed','dropped')),
   user_agent text not null default '',
+  external_id text not null default '',
+  source text not null default '',
+  params jsonb not null default '{}'::jsonb,
   started_at timestamptz not null default now(),
   completed_at timestamptz
 );
 create index if not exists participants_experiment_idx on participants(experiment_id);
+create index if not exists participants_external_idx on participants(experiment_id, external_id);
 
 create table if not exists exposures (
   id uuid primary key default gen_random_uuid(),
@@ -92,7 +96,8 @@ create table if not exists exposures (
   sort_order integer not null default 0,
   label_snapshot jsonb not null default '{}'::jsonb,
   shown_at timestamptz,
-  duration_ms integer
+  duration_ms integer,
+  cta_clicked_at timestamptz
 );
 create index if not exists exposures_participant_idx on exposures(participant_id);
 

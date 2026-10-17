@@ -2,10 +2,21 @@
 
 import { useActionState } from "react";
 import { consentAction, type ActionState } from "./actions";
+import type { EntryInfo } from "@/lib/participant";
 
-export function ConsentForm({ slug, startLabel, pendingLabel }: { slug: string; startLabel: string; pendingLabel: string }) {
+export function ConsentForm({
+  slug,
+  entry,
+  startLabel,
+  pendingLabel,
+}: {
+  slug: string;
+  entry: EntryInfo;
+  startLabel: string;
+  pendingLabel: string;
+}) {
   const [state, formAction, pending] = useActionState(
-    async (): Promise<ActionState> => consentAction(slug),
+    async (): Promise<ActionState> => consentAction(slug, entry),
     {},
   );
   return (

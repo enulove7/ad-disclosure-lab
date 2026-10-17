@@ -6,7 +6,18 @@ import { DisclosureLabel } from "./DisclosureLabel";
  * 이미지 위에 조건별 공개 라벨을 CSS로 오버레이한다.
  * 이미지 자체는 모든 조건에서 동일하므로 라벨 외의 차이가 생기지 않는다.
  */
-export function AdCard({ ad, label, adWord = "AD" }: { ad: Ad; label: LabelConfig; adWord?: string }) {
+export function AdCard({
+  ad,
+  label,
+  adWord = "AD",
+  onCtaClick,
+}: {
+  ad: Ad;
+  label: LabelConfig;
+  adWord?: string;
+  /** 지정하면 CTA 가 버튼이 되어 클릭을 기록할 수 있다 (행동 지표) */
+  onCtaClick?: () => void;
+}) {
   const topBar = label.enabled && label.position === "top-bar";
   const bottomBar = label.enabled && label.position === "bottom-bar";
   const below = label.enabled && label.position === "below-image";
@@ -40,12 +51,22 @@ export function AdCard({ ad, label, adWord = "AD" }: { ad: Ad; label: LabelConfi
 
       {bottomBar && <DisclosureLabel label={label} />}
 
-      {ad.cta_text && (
-        <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5 text-sm font-semibold">
-          <span>{ad.cta_text}</span>
-          <span aria-hidden="true">›</span>
-        </div>
-      )}
+      {ad.cta_text &&
+        (onCtaClick ? (
+          <button
+            type="button"
+            onClick={onCtaClick}
+            className="flex w-full items-center justify-between border-b border-neutral-100 px-4 py-2.5 text-left text-sm font-semibold active:bg-neutral-50"
+          >
+            <span>{ad.cta_text}</span>
+            <span aria-hidden="true">›</span>
+          </button>
+        ) : (
+          <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5 text-sm font-semibold">
+            <span>{ad.cta_text}</span>
+            <span aria-hidden="true">›</span>
+          </div>
+        ))}
 
       {below && <DisclosureLabel label={label} />}
 

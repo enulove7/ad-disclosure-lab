@@ -56,7 +56,7 @@ export default async function ResultsPage(props: PageProps<"/admin/[id]/results"
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card title={d.resParticipants}>
           <table className="w-full text-sm">
             <thead className="text-xs text-neutral-500">
@@ -120,6 +120,29 @@ export default async function ResultsPage(props: PageProps<"/admin/[id]/results"
                   <tr key={c.id} className="border-t border-neutral-100">
                     <td className="py-1">{c.code}</td>
                     <td className="py-1 text-right tabular-nums">{e && e.n > 0 ? `${e.mean.toFixed(1)}s (n=${e.n})` : "—"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Card>
+        <Card title={d.resCta}>
+          <table className="w-full text-sm">
+            <thead className="text-xs text-neutral-500">
+              <tr>
+                <th className="py-1 text-left">{d.colCondition}</th>
+                <th className="py-1 text-right">%</th>
+              </tr>
+            </thead>
+            <tbody>
+              {conditions.map((c) => {
+                const x = s.cta[c.id];
+                return (
+                  <tr key={c.id} className="border-t border-neutral-100">
+                    <td className="py-1">{c.code}</td>
+                    <td className="py-1 text-right tabular-nums">
+                      {x && x.n > 0 ? `${Math.round((x.clicked / x.n) * 100)}% (${x.clicked}/${x.n})` : "—"}
+                    </td>
                   </tr>
                 );
               })}

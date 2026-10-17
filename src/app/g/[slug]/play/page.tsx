@@ -1,12 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { getStore } from "@/lib/db";
-import { asLocale, t } from "@/lib/i18n";
+import { asLocale, t, type Locale } from "@/lib/i18n";
 import { gameSettings, getCurrentGameSession } from "@/lib/game";
 import { Play, type PlayText } from "./Play";
 
 export const dynamic = "force-dynamic";
 
-function playText(locale: "ja" | "ko"): PlayText {
+function playText(locale: Locale): PlayText {
   const g = t(locale).g;
   return {
     likingQ: g.likingQ,

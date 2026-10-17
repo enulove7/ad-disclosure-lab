@@ -54,7 +54,26 @@ export function pickCondition(
 }
 
 /** 동의 직후 호출: 참가자 생성, 조건 배정, 광고 노출 순서 확정, 쿠키 발급 */
-export async function startParticipant(experiment: Experiment, userAgent: string): Promise<Participant> {
+export interface EntryInfo {
+  external_id: string;
+  source: string;
+  params: Record<string, string>;
+}
+
+/** 참여 URL 의 쿼리에서 패널 정보 추출. pid/src 외의 값은 params 로 보관 */
+export function parseEntry(sp: Record<string, string | string[] | undefined>): EntryInfo {
+  const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
+  const params: Record<string, string> = {};
+  for (const [k, v] of Object.entries(sp)) {
+    const val = one(v);
+    if (val) params[k] = val.slice(0, 200);
+  }
+  const external_id = (params.pid ?? params.PROLIFIC_PID ?? params.participant_id ?? "").slice(0, 120);
+  const source = (params.src ?? params.source ?? "").slice(0, 60);
+  return { external_id, source, params };
+}
+
+export async function startParticipant(experiment: Experiment, userAgent: string, entry?: EntryInfo): Promise<Participant> {
   const store = getStore();
   const settings = { ...DEFAULT_SETTINGS, ...experiment.settings };
   const [conditions, ads, counts] = await Promise.all([
@@ -73,6 +92,9 @@ export async function startParticipant(experiment: Experiment, userAgent: string
     token,
     status: "started",
     user_agent: userAgent.slice(0, 500),
+    external_id: entry?.external_id ?? "",
+    source: entry?.source ?? "",
+    params: entry?.params ?? {},
     started_at: new Date().toISOString(),
     completed_at: null,
   });
@@ -89,6 +111,7 @@ export async function startParticipant(experiment: Experiment, userAgent: string
       label_snapshot: condition.label_config,
       shown_at: null,
       duration_ms: null,
+      cta_clicked_at: null,
     })),
   );
 

@@ -35,6 +35,8 @@
    | `SUPABASE_SERVICE_ROLE_KEY` | 1-5 에서 복사한 service_role 키 |
    | `GEMINI_API_KEY` | (선택) Google AI Studio 키. AI 이미지 생성에 사용 |
 
+   기존 배포를 업데이트할 때 `supabase/migrations/` 에 새 번호 파일이 생겼으면 SQL Editor 에서 그 파일만 실행한다.
+
 5. **Deploy** → 2~3분 기다림 → "Congratulations" 화면에서 도메인 확인 (예: `ad-disclosure-lab.vercel.app`).
 
 ## 3. 동작 확인 (2분)

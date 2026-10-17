@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getStore } from "@/lib/db";
-import { getCurrentParticipant, nextStepPath, parseAnswers, startParticipant } from "@/lib/participant";
+import { getCurrentParticipant, nextStepPath, parseAnswers, startParticipant, type EntryInfo } from "@/lib/participant";
 import { participantDict } from "@/lib/i18n-server";
 
 export interface ActionState {
@@ -17,7 +17,7 @@ async function loadExperiment(slug: string) {
   return exp;
 }
 
-export async function consentAction(slug: string): Promise<ActionState> {
+export async function consentAction(slug: string, entry?: EntryInfo): Promise<ActionState> {
   const exp = await loadExperiment(slug);
   const { d } = participantDict(exp);
   if (exp.status !== "active") return { error: d.closed };
@@ -28,7 +28,7 @@ export async function consentAction(slug: string): Promise<ActionState> {
   }
   const ua = (await headers()).get("user-agent") ?? "";
   try {
-    await startParticipant(exp, ua);
+    await startParticipant(exp, ua, entry);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
     const mapped = msg === "NO_CONDITIONS" ? d.noConditions : msg === "NO_ADS" ? d.noAds : d.startFailed;
@@ -113,6 +113,17 @@ export async function submitAdAction(
   }
   const next = remaining.sort((a, b) => a.sort_order - b.sort_order)[0];
   redirect(`/p/${slug}/ad/${next.sort_order + 1}`);
+}
+
+/** 광고 버튼(CTA) 클릭 기록. 행동 지표. 최초 1회만 저장 */
+export async function ctaClickAction(slug: string, exposureId: string): Promise<void> {
+  const store = getStore();
+  const exp = await loadExperiment(slug);
+  const p = await getCurrentParticipant(exp);
+  if (!p) return;
+  const exposure = (await store.listExposures(p.id)).find((x) => x.id === exposureId);
+  if (!exposure || exposure.cta_clicked_at) return;
+  await store.updateExposure(exposure.id, { cta_clicked_at: new Date().toISOString() });
 }
 
 export async function submitFinalAction(

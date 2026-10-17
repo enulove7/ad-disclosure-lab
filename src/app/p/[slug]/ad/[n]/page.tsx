@@ -44,6 +44,8 @@ export default async function AdPage(props: PageProps<"/p/[slug]/ad/[n]">) {
       totalSteps={exposures.length + 2}
     >
       <AdStep
+        slug={slug}
+        exposureId={exposure.id}
         ad={ad}
         label={exposure.label_snapshot}
         items={items}

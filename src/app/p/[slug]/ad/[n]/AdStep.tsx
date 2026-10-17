@@ -5,6 +5,7 @@ import type { Ad, LabelConfig, SurveyItem } from "@/lib/types";
 import type { ActionState } from "@/app/p/[slug]/actions";
 import { AdCard } from "@/components/AdCard";
 import { SurveyForm } from "@/components/SurveyForm";
+import { ctaClickAction } from "@/app/p/[slug]/actions";
 
 export interface AdStepText {
   instruction: string;
@@ -22,6 +23,8 @@ export interface AdStepText {
  * 실제 노출 시작 시각과 제출까지 걸린 시간(ms)을 함께 전송한다.
  */
 export function AdStep({
+  slug,
+  exposureId,
   ad,
   label,
   items,
@@ -29,6 +32,8 @@ export function AdStep({
   minSeconds,
   text,
 }: {
+  slug: string;
+  exposureId: string;
   ad: Ad;
   label: LabelConfig;
   items: SurveyItem[];
@@ -52,6 +57,13 @@ export function AdStep({
     };
   }, []);
 
+  const [ctaClicked, setCtaClicked] = useState(false);
+  function onCta() {
+    if (ctaClicked) return;
+    setCtaClicked(true);
+    void ctaClickAction(slug, exposureId);
+  }
+
   const elapsedMs = clock?.elapsedMs ?? 0;
   const remaining = Math.max(0, Math.ceil(minSeconds - elapsedMs / 1000));
   const revealed = clock !== null && remaining === 0;
@@ -59,7 +71,7 @@ export function AdStep({
   return (
     <div className="space-y-6">
       <p className="text-sm text-neutral-600">{text.instruction}</p>
-      <AdCard ad={ad} label={label} adWord={text.adWord} />
+      <AdCard ad={ad} label={label} adWord={text.adWord} onCtaClick={onCta} />
 
       {!revealed ? (
         <p className="text-center text-sm text-neutral-500">{text.waitTemplate.replace("{s}", String(remaining))}</p>

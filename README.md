@@ -31,12 +31,19 @@ service role 키는 서버에서만 쓰이고 브라우저로는 절대 나가�
 단계별 안내는 [DEPLOY.md](./DEPLOY.md). 요약하면 저장소를 Vercel에 연결하고 환경변수 3개(`ADMIN_PASSWORD`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`)를 넣으면 끝.
 Vercel의 파일시스템은 읽기 전용이라 로컬 JSON 저장소는 배포 환경에서 쓸 수 없다. 반드시 Supabase를 설정할 것.
 
-## 언어 (일본어 / 한국어)
+## 언어 (일본어 / 한국어 / 영어)
 
 - **참가자 화면**: 실험마다 언어를 정한다(새 실험 만들기 또는 개요 탭의 「참가자 화면 언어」). 프리셋도 그 언어로 들어간다.
-  일본인 대상 실험과 한국인 대상 실험을 같은 앱에서 동시에 돌릴 수 있다.
-- **관리자 화면**: 오른쪽 위 토글(日本語 / 한국어)로 바꾼다. 쿠키에 저장되며 기본은 한국어.
-- 문구는 모두 `src/lib/i18n.ts` 한 파일에 있다. 영어 등 다른 언어를 추가하려면 `Locale`에 코드를 추가하고 사전을 하나 더 쓰면 된다.
+  일본·미국 비교 연구라면 일본어 실험과 영어 실험을 하나씩 만들고, CSV 의 `experiment_locale` 열을 국가 요인으로 쓴다.
+- **관리자 화면**: 오른쪽 위 토글(日本語 / 한국어 / English)로 바꾼다. 쿠키에 저장되며 기본은 한국어.
+- 문구는 모두 `src/lib/i18n.ts` 한 파일에 있다. 다른 언어를 추가하려면 `Locale`에 코드를 추가하고 사전을 하나 더 쓰면 된다.
+
+## 온라인 패널 연동 (Prolific, CloudResearch, Yahoo!クラウドソーシング 등)
+
+- 참여 URL 에 `?pid=<참가자ID>&src=<패널명>` 을 붙여 배포한다. Prolific 은 `?pid={{%PROLIFIC_PID%}}&src=prolific`.
+  `pid`/`src`/그 외 파라미터는 참가자 레코드(`external_id`, `source`, `params`)에 저장되고 CSV 에 나온다.
+- 개요 탭의 **완료 코드**를 넣으면 디브리핑 화면에 크게 표시된다. **복귀 URL** 을 넣으면 버튼이 생기며 `{pid}` 는 참가자 외부 ID 로 치환된다.
+- 광고 카드의 버튼(CTA) 클릭은 노출 단위로 기록되어(`cta_clicked`) To et al.(2025) 식 클릭률 분석에 쓸 수 있다.
 
 ## 구조
 
@@ -91,11 +98,12 @@ scripts/e2e/flow.mjs    Playwright 스모크 테스트(관리자 생성 → 참�
 ## 결과 탭과 분석
 
 - 관리자 **결과** 탭: 조건별 참가자 수, 주의 점검 통과율, 노출 시간, 구성개념별 조건 평균(95% CI) 그래프와 표, 조작 점검 분포. 「광고별로 나누기」로 광고별 분해.
-- `analysis/analyze.py`: long CSV 를 읽어 Cronbach α, 조건별 기술통계, 일원분산분석(F, p, η²), 선택형 분포를 마크다운으로 출력.
+- `analysis/analyze.py`: long CSV 를 읽어 Cronbach α, 조건별 기술통계, 일원분산분석(F, p, η²), CTA 클릭률, 선택형 분포를 마크다운으로 출력.
+  CSV 를 2개 이상 넣으면(예: 일본 실험 + 미국 실험) `experiment_locale` 을 국가 요인으로 한 이원분산분석도 출력한다.
 
 ```bash
 pip install -r analysis/requirements.txt
-python analysis/analyze.py export_long.csv --out report.md
+python analysis/analyze.py japan_long.csv us_long.csv --out report.md
 ```
 
 논문용 본 분석(혼합 분산분석, 매개·조절 분석)은 R 이나 SPSS PROCESS 로 하고, 이 스크립트는 데이터 점검과 초안 표에 쓴다.

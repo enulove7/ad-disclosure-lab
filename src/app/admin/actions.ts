@@ -122,6 +122,8 @@ export async function updateExperimentAction(id: string, _prev: FormState, form:
       | "balanced"
       | "weighted",
     locale: asLocale(str(form, "locale")),
+    completion_code: str(form, "completion_code").trim(),
+    completion_url: str(form, "completion_url").trim(),
   };
   await store.updateExperiment(id, {
     title: str(form, "title").trim() || "Untitled",

@@ -1,4 +1,5 @@
 // 도메인 타입. DB 컬럼명(snake_case)과 동일하게 유지해 매핑 비용을 없앤다.
+import type { Locale } from "@/lib/i18n";
 
 export type ExperimentStatus = "draft" | "active" | "closed";
 
@@ -24,7 +25,11 @@ export interface ExperimentSettings {
   /** 조건 배정 방식: balanced = 가장 적게 배정된 조건 우선, weighted = 가중치 확률 */
   assignment: "balanced" | "weighted";
   /** 참가자 화면 언어 */
-  locale: "ja" | "ko";
+  locale: Locale;
+  /** 종료 화면에 표시할 완료 코드 (패널 연동용, 비우면 표시 안 함) */
+  completion_code: string;
+  /** 종료 화면의 복귀 링크. {pid} 는 external_id 로 치환 */
+  completion_url: string;
 }
 
 export type LabelPosition =
@@ -120,6 +125,12 @@ export interface Participant {
   token: string;
   status: ParticipantStatus;
   user_agent: string;
+  /** 패널에서 넘어온 참가자 ID (?pid=) */
+  external_id: string;
+  /** 유입 경로 (?src=) */
+  source: string;
+  /** 참여 URL 의 나머지 쿼리 파라미터 */
+  params: Record<string, string>;
   started_at: string;
   completed_at: string | null;
 }
@@ -134,6 +145,8 @@ export interface Exposure {
   label_snapshot: LabelConfig;
   shown_at: string | null;
   duration_ms: number | null;
+  /** 광고 버튼(CTA) 클릭 시각. 행동 지표 */
+  cta_clicked_at: string | null;
 }
 
 export interface Response {
@@ -152,6 +165,8 @@ export const DEFAULT_SETTINGS: ExperimentSettings = {
   randomize_ad_order: true,
   assignment: "balanced",
   locale: "ja",
+  completion_code: "",
+  completion_url: "",
 };
 
 export const DEFAULT_LABEL: LabelConfig = {
@@ -171,7 +186,7 @@ export interface GameSettings {
   cards_per_round: number;
   /** 결과 화면에서 연결할 실험 slug (비우면 링크 없음) */
   link_experiment_slug: string;
-  locale: "ja" | "ko";
+  locale: Locale;
   /** 판정 전에 호감도를 묻는지 */
   ask_liking: boolean;
 }

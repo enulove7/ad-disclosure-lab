@@ -1,6 +1,7 @@
-import type { Ad, Condition, Exposure, Participant, Response, SurveyItem } from "@/lib/types";
+import type { Ad, Condition, Experiment, Exposure, Participant, Response, SurveyItem } from "@/lib/types";
 
 export interface ExportData {
+  experiment: Experiment;
   conditions: Condition[];
   ads: Ad[];
   items: SurveyItem[];
@@ -29,8 +30,12 @@ export function buildLongCsv(d: ExportData): string {
   const pIndex = new Map(d.participants.map((p, i) => [p.id, i + 1]));
 
   const header = [
+    "experiment_slug",
+    "experiment_locale",
     "participant_no",
     "participant_id",
+    "external_id",
+    "source",
     "condition_code",
     "condition_name",
     "status",
@@ -46,6 +51,7 @@ export function buildLongCsv(d: ExportData): string {
     "label_size",
     "label_style",
     "duration_ms",
+    "cta_clicked",
     "item_code",
     "construct",
     "item_type",
@@ -60,8 +66,12 @@ export function buildLongCsv(d: ExportData): string {
     const it = item.get(r.item_id);
     const l = x?.label_snapshot;
     return [
+      d.experiment.slug,
+      d.experiment.settings?.locale ?? "",
       pIndex.get(r.participant_id),
       r.participant_id,
+      p?.external_id ?? "",
+      p?.source ?? "",
       c?.code,
       c?.name,
       p?.status,
@@ -77,6 +87,7 @@ export function buildLongCsv(d: ExportData): string {
       l?.size,
       l?.style,
       x?.duration_ms,
+      x ? (x.cta_clicked_at ? 1 : 0) : "",
       it?.code,
       it?.construct,
       it?.type,
@@ -87,12 +98,13 @@ export function buildLongCsv(d: ExportData): string {
   // 참가자 → 단계(pre→post_ad→final) → 노출 순서 → 문항 순서
   const PHASE_RANK: Record<string, number> = { pre: 0, post_ad: 1, final: 2 };
   const itemRank = new Map(d.items.map((i) => [i.code, i.sort_order]));
+  // 열 위치: participant_no=2, phase=11, exposure_order=12, item_code=22
   rows.sort(
     (a, b) =>
-      Number(a[0]) - Number(b[0]) ||
-      (PHASE_RANK[String(a[7])] ?? 9) - (PHASE_RANK[String(b[7])] ?? 9) ||
-      Number(a[8] || 0) - Number(b[8] || 0) ||
-      (itemRank.get(String(a[17])) ?? 0) - (itemRank.get(String(b[17])) ?? 0),
+      Number(a[2]) - Number(b[2]) ||
+      (PHASE_RANK[String(a[11])] ?? 9) - (PHASE_RANK[String(b[11])] ?? 9) ||
+      Number(a[12] || 0) - Number(b[12] || 0) ||
+      (itemRank.get(String(a[22])) ?? 0) - (itemRank.get(String(b[22])) ?? 0),
   );
   return rowsToCsv(header, rows);
 }
@@ -107,8 +119,12 @@ export function buildWideCsv(d: ExportData): string {
   const ads = [...d.ads].sort((a, b) => a.sort_order - b.sort_order);
 
   const header: string[] = [
+    "experiment_slug",
+    "experiment_locale",
     "participant_no",
     "participant_id",
+    "external_id",
+    "source",
     "condition_code",
     "status",
     "started_at",
@@ -116,7 +132,7 @@ export function buildWideCsv(d: ExportData): string {
   ];
   for (const i of preItems) header.push(i.code);
   for (const a of ads) {
-    header.push(`${a.code}__order`, `${a.code}__duration_ms`);
+    header.push(`${a.code}__order`, `${a.code}__duration_ms`, `${a.code}__cta_clicked`);
     for (const i of postItems) header.push(`${a.code}__${i.code}`);
   }
   for (const i of finalItems) header.push(i.code);
@@ -137,14 +153,25 @@ export function buildWideCsv(d: ExportData): string {
   const rows = d.participants.map((p, idx) => {
     const rs = byParticipant.get(p.id) ?? [];
     const xs = expoByParticipant.get(p.id) ?? [];
-    const row: unknown[] = [idx + 1, p.id, cond.get(p.condition_id)?.code, p.status, p.started_at, p.completed_at];
+    const row: unknown[] = [
+      d.experiment.slug,
+      d.experiment.settings?.locale ?? "",
+      idx + 1,
+      p.id,
+      p.external_id ?? "",
+      p.source ?? "",
+      cond.get(p.condition_id)?.code,
+      p.status,
+      p.started_at,
+      p.completed_at,
+    ];
     const find = (itemId: string, exposureId: string | null) =>
       rs.find((r) => r.item_id === itemId && (r.exposure_id ?? null) === exposureId)?.value;
 
     for (const i of preItems) row.push(find(i.id, null));
     for (const a of ads) {
       const x = xs.find((e) => e.ad_id === a.id);
-      row.push(x ? x.sort_order + 1 : "", x?.duration_ms ?? "");
+      row.push(x ? x.sort_order + 1 : "", x?.duration_ms ?? "", x ? (x.cta_clicked_at ? 1 : 0) : "");
       for (const i of postItems) row.push(x ? find(i.id, x.id) : "");
     }
     for (const i of finalItems) row.push(find(i.id, null));

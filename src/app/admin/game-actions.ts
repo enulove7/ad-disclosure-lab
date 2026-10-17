@@ -24,7 +24,8 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
 }
 
-const INTRO: Record<"ja" | "ko", string> = {
+const INTRO: Record<"ja" | "ko" | "en", string> = {
+  en: "Was this ad image made by AI, or by a person?\nLook at 10 ads and guess. At the end you'll see your detection rate. Takes about 2 minutes. Answers are anonymous and used for research.",
   ja: "この広告の画像、AIが作った？それとも人が作った？\n10枚の広告を見て当ててみよう。最後にあなたの「見破り率」が出ます。所要時間は約2分。回答は匿名で研究に使われます。",
   ko: "이 광고 이미지, AI가 만들었을까? 사람이 만들었을까?\n광고 10장을 보고 맞혀 보세요. 마지막에 당신의 「판별률」이 나옵니다. 약 2분 소요. 응답은 익명으로 연구에 사용됩니다.",
 };

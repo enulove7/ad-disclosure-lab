@@ -21,7 +21,7 @@ export async function GET(req: Request, ctx: RouteContext<"/admin/[id]/export">)
     store.listExposuresByExperiment(id),
     store.listResponsesByExperiment(id),
   ]);
-  const data = { conditions, ads, items, participants, exposures, responses };
+  const data = { experiment: exp, conditions, ads, items, participants, exposures, responses };
   const csv = format === "wide" ? buildWideCsv(data) : buildLongCsv(data);
   const name = `${exp.slug}_${format}_${new Date().toISOString().slice(0, 10)}.csv`;
   // BOM을 붙여 Excel(일본어 환경)에서 바로 열리게 한다

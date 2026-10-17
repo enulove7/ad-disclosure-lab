@@ -28,6 +28,7 @@ export default async function ParticipantsPage(props: PageProps<"/admin/[id]/par
             <tr>
               <th className="px-3 py-2">#</th>
               <th className="px-3 py-2">{d.colCondition}</th>
+              <th className="px-3 py-2">{d.colExternalId}</th>
               <th className="px-3 py-2">{d.colStatus}</th>
               <th className="px-3 py-2">{d.colStarted}</th>
               <th className="px-3 py-2">{d.colCompleted}</th>
@@ -45,6 +46,10 @@ export default async function ParticipantsPage(props: PageProps<"/admin/[id]/par
                 <tr key={p.id} className="border-t border-neutral-100">
                   <td className="px-3 py-2 text-neutral-400">{i + 1}</td>
                   <td className="px-3 py-2">{condName.get(p.condition_id) ?? "?"}</td>
+                  <td className="px-3 py-2 text-xs">
+                    {p.external_id || "—"}
+                    {p.source && <span className="ml-1 text-neutral-400">({p.source})</span>}
+                  </td>
                   <td className="px-3 py-2">{d.pStatus[p.status] ?? p.status}</td>
                   <td className="px-3 py-2 text-xs">{fmt(p.started_at)}</td>
                   <td className="px-3 py-2 text-xs">{p.completed_at ? fmt(p.completed_at) : "—"}</td>
@@ -54,7 +59,7 @@ export default async function ParticipantsPage(props: PageProps<"/admin/[id]/par
             })}
             {participants.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-3 py-6 text-center text-neutral-500">
+                <td colSpan={7} className="px-3 py-6 text-center text-neutral-500">
                   {d.noParticipants}
                 </td>
               </tr>

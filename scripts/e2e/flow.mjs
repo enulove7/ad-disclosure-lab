@@ -37,6 +37,8 @@ await page.screenshot({ path: `${SHOTS}/01-overview.png`, fullPage: true });
 // 3. set active + min exposure 2s
 await page.selectOption('select[name="status"]', "active");
 await page.fill('input[name="min_exposure_seconds"]', "2");
+await page.fill('input[name="completion_code"]', "E2ECODE");
+await page.fill('input[name="completion_url"]', "https://example.com/done?pid={pid}");
 await page.click('form:has(select[name="status"]) button');
 await page.waitForSelector('p.text-green-700');
 console.log("activated");
@@ -56,7 +58,7 @@ async function runParticipant(n) {
   pctx.setDefaultTimeout(TIMEOUT);
   const p = await pctx.newPage();
   p.on("pageerror", (e) => console.log("P PAGEERROR", e.message));
-  await p.goto(`${BASE}/p/${SLUG}`);
+  await p.goto(n === 1 ? `${BASE}/p/${SLUG}?pid=PANEL${n}&src=e2e` : `${BASE}/p/${SLUG}`);
   if (n === 1) await p.screenshot({ path: `${SHOTS}/10-consent.png`, fullPage: true });
   await p.click('button[type="submit"]');
   await p.waitForURL(`${BASE}/p/${SLUG}/pre`);
@@ -79,6 +81,7 @@ async function runParticipant(n) {
     await p.waitForURL(new RegExp(`/p/${SLUG}/ad/${i}$`));
     if (n === 1 && i === 1) await p.screenshot({ path: `${SHOTS}/12-ad-waiting.png`, fullPage: true });
     await p.waitForSelector('form fieldset', { timeout: 10000 });
+    if (i === 1 && n % 2 === 1) await p.click('article button'); // CTA 클릭 (홀수 참가자만)
     for (const fs of await p.$$("fieldset")) {
       const radios = await fs.$$('input[type="radio"]');
       if (radios.length) await radios[Math.floor(Math.random() * radios.length)].check();
@@ -97,6 +100,7 @@ async function runParticipant(n) {
   await p.click('button[type="submit"]');
   await p.waitForURL(`${BASE}/p/${SLUG}/done`);
   if (n === 1) await p.screenshot({ path: `${SHOTS}/14-done.png`, fullPage: true });
+  if (n === 1) console.log('done page has code:', (await p.textContent('main')).includes('E2ECODE'));
   // revisiting consent should go to done
   await p.goto(`${BASE}/p/${SLUG}`);
   await p.waitForURL(`${BASE}/p/${SLUG}/done`);
@@ -118,6 +122,9 @@ for (const f of ["long", "wide"]) {
   const lines = text.split("\r\n");
   console.log(`export ${f}: status ${res.status}, rows ${lines.length - 1}, cols ${lines[0].split(",").length}`);
   console.log("  header:", lines[0].slice(0, 200));
+  const hdr = lines[0].split(',');
+  for (const col of ['experiment_slug','experiment_locale','external_id','source']) if (!hdr.includes(col)) console.log('MISSING COLUMN', col);
+  if (f === 'long') { const i = hdr.indexOf('external_id'); console.log('  external ids:', [...new Set(lines.slice(1).map((l) => l.split(',')[i]))].join('|')); const c = hdr.indexOf('cta_clicked'); console.log('  cta values:', [...new Set(lines.slice(1).map((l) => l.split(',')[c]))].join('|')); }
   console.log("  row1:", lines[1].slice(0, 200));
 }
 const unauth = await fetch(`${expUrl}/export?format=long`, { redirect: "manual" });

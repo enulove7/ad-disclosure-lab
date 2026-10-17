@@ -139,6 +139,15 @@ export default async function OverviewPage(props: PageProps<"/admin/[id]">) {
           <Field name="debrief_text" title={d.debriefText}>
             <textarea id="debrief_text" name="debrief_text" defaultValue={exp.debrief_text} className={input} rows={5} />
           </Field>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field name="completion_code" title={d.completionCode}>
+              <input id="completion_code" name="completion_code" defaultValue={settings.completion_code} className={input} placeholder="C1A2B3C4" />
+            </Field>
+            <Field name="completion_url" title={d.completionUrl}>
+              <input id="completion_url" name="completion_url" defaultValue={settings.completion_url} className={input} placeholder="https://app.prolific.com/submissions/complete?cc=C1A2B3C4" />
+            </Field>
+          </div>
+          <p className="text-xs text-neutral-500">{d.panelHint}</p>
           <button className={btn}>{d.save}</button>
         </SaveForm>
       </Card>
