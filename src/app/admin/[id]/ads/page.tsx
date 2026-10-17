@@ -11,6 +11,8 @@ import { ImageGenPanel } from "@/components/admin/ImageGenPanel";
 import { defaultImageModel, IMAGE_MODELS, imageGenAvailable } from "@/lib/imagegen";
 
 export const dynamic = "force-dynamic";
+// AI 이미지 생성(최대 4장 연속)이 서버 액션으로 돌아가므로 실행 시간 상한을 넉넉히 잡는다
+export const maxDuration = 120;
 
 function AdForm({ experimentId, a, d }: { experimentId: string; a?: Ad; d: Dict["a"] }) {
   return (
