@@ -37,6 +37,7 @@ export default async function NewExperimentPage() {
             <select id="preset_kind" name="preset_kind" defaultValue="main" className={input}>
               <option value="main">{d.presetMain}</option>
               <option value="pretest">{d.presetPretest}</option>
+              <option value="thesis">{d.presetThesis}</option>
               <option value="none">{d.presetNone}</option>
             </select>
           </Field>

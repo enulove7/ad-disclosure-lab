@@ -112,6 +112,7 @@ const ja = {
     presetMain: "本実験（条件C0〜C3・広告2本・基本質問）",
     presetPretest: "予備調査（表示なし・画像候補6枚・画像評価の質問）",
     presetNone: "空の実験",
+    presetThesis: "本調査（AI開示あり/なし・広告1本・論文の尺度）",
     titleRequired: "タイトルは必須です。",
     slugTaken: "このスラッグは既に使われています。",
     // overview
@@ -381,6 +382,7 @@ const ko: Dict = {
     presetMain: "본 실험 (조건 C0~C3, 광고 2개, 기본 설문)",
     presetPretest: "예비조사 (표시 없음, 이미지 후보 6장, 이미지 평가 문항)",
     presetNone: "빈 실험",
+    presetThesis: "본조사 (AI 공개 유/무, 광고 1개, 논문 척도)",
     titleRequired: "제목은 필수입니다.",
     slugTaken: "이미 사용 중인 슬러그입니다.",
     participation: "참여 현황",
@@ -640,6 +642,7 @@ const en: Dict = {
     presetMain: "Main study (conditions C0–C3, 2 ads, default survey)",
     presetPretest: "Pilot (no label, 6 image candidates, image evaluation items)",
     presetNone: "Empty experiment",
+    presetThesis: "Thesis main study (disclosure yes/no, 1 ad, thesis scales)",
     titleRequired: "Title is required.",
     slugTaken: "This slug is already in use.",
     participation: "Participation",

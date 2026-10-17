@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getStore } from "@/lib/db";
 import { ADMIN_COOKIE, adminSessionValue, checkPassword, requireAdmin } from "@/lib/auth";
-import { getPresets, getPretestPresets } from "@/lib/presets";
+import { getPresets, getPretestPresets, getThesisPresets } from "@/lib/presets";
 import { defaultImageModel, generateImage, IMAGE_MODELS } from "@/lib/imagegen";
 import { asLocale, LOCALES, type Locale } from "@/lib/i18n";
 import { ADMIN_LOCALE_COOKIE, adminDict } from "@/lib/i18n-server";
@@ -90,7 +90,7 @@ export async function createExperimentAction(_prev: FormState, form: FormData): 
 
   const locale = asLocale(str(form, "locale"));
   const kind = str(form, "preset_kind", "main");
-  const presets = kind === "pretest" ? getPretestPresets(locale) : getPresets(locale);
+  const presets = kind === "pretest" ? getPretestPresets(locale) : kind === "thesis" ? getThesisPresets(locale) : getPresets(locale);
   const withPresets = kind !== "none";
   const exp = await store.createExperiment({
     slug,
@@ -99,7 +99,7 @@ export async function createExperimentAction(_prev: FormState, form: FormData): 
     status: "draft",
     consent_text: presets.consent,
     debrief_text: presets.debrief,
-    settings: { ...DEFAULT_SETTINGS, locale, ...(kind === "pretest" ? { min_exposure_seconds: 5 } : {}) },
+    settings: { ...DEFAULT_SETTINGS, locale, ...(kind === "pretest" ? { min_exposure_seconds: 5 } : {}), ...(kind === "thesis" ? { ads_per_participant: 1 } : {}) },
   });
 
   if (withPresets) {
