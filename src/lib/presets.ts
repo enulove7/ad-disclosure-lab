@@ -182,7 +182,7 @@ const ITEM_PRESETS_JA: ItemPreset[] = [
     type: "likert",
     scale_points: 7,
     scale_labels: L7_JA,
-    options: [],
+    options: ["2"],
     required: true,
     sort_order: 12,
   },
@@ -336,6 +336,7 @@ const ITEM_PRESETS_KO: ItemPreset[] = [
   likertKo("post_ad", "auth1", "authenticity", "이 광고에는 사람다운 따뜻함이 있다.", 11),
   {
     ...likertKo("post_ad", "attn1", "attention_check", "주의 확인을 위해 이 질문에서는 「2」를 선택해 주세요.", 12),
+    options: ["2"],
   },
 
   {

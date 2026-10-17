@@ -77,6 +77,18 @@ scripts/e2e/flow.mjs    Playwright 스모크 테스트(관리자 생성 → 참�
 
 조건을 나중에 수정해도 `exposures.label_snapshot`에 노출 당시 라벨이 남아 있으므로 과거 데이터 해석이 꼬이지 않는다.
 
+## 결과 탭과 분석
+
+- 관리자 **결과** 탭: 조건별 참가자 수, 주의 점검 통과율, 노출 시간, 구성개념별 조건 평균(95% CI) 그래프와 표, 조작 점검 분포. 「광고별로 나누기」로 광고별 분해.
+- `analysis/analyze.py`: long CSV 를 읽어 Cronbach α, 조건별 기술통계, 일원분산분석(F, p, η²), 선택형 분포를 마크다운으로 출력.
+
+```bash
+pip install -r analysis/requirements.txt
+python analysis/analyze.py export_long.csv --out report.md
+```
+
+논문용 본 분석(혼합 분산분석, 매개·조절 분석)은 R 이나 SPSS PROCESS 로 하고, 이 스크립트는 데이터 점검과 초안 표에 쓴다.
+
 ## CSV
 
 - `long`: 응답 1건 = 1행. R/Python에서 pivot 하기 좋다.

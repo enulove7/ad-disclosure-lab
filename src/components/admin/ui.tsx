@@ -54,6 +54,7 @@ export function Tabs({ id, active, d }: { id: string; active: string; d: Dict["a
     ["survey", d.tabs.survey],
     ["preview", d.tabs.preview],
     ["participants", d.tabs.participants],
+    ["results", d.tabs.results],
   ];
   return (
     <nav className="mb-6 flex flex-wrap gap-1 border-b border-neutral-200">
