@@ -133,7 +133,7 @@ export interface Response {
 }
 
 export const DEFAULT_SETTINGS: ExperimentSettings = {
-  min_exposure_seconds: 15,
+  min_exposure_seconds: 10,
   ads_per_participant: 0,
   randomize_ad_order: true,
   assignment: "balanced",
