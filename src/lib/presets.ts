@@ -585,3 +585,157 @@ export function labelSummary(l: LabelConfig): string {
   if (!l.enabled) return "表示なし";
   return `${l.text}${l.description ? " / " + l.description : ""}（${l.position}, ${l.size}, ${l.style}）`;
 }
+
+// ===================== 예비조사(자극물 선별) 프리셋 =====================
+// 라벨 없는 단일 조건에서 후보 이미지 여러 장을 평가해 본 실험용 자극물을 고른다.
+
+const PRETEST_VARIANTS: Array<{ code: string; name: { ja: string; ko: string; en: string }; scene: string }> = [
+  { code: "V1", name: { ja: "路地（歩き）", ko: "골목 (걷기)", en: "Backstreet (walking)" }, scene: "walking on a quiet residential backstreet in soft overcast daylight, candid editorial style, full body" },
+  { code: "V2", name: { ja: "スタジオ白背景", ko: "스튜디오 흰 배경", en: "Studio white background" }, scene: "standing in a bright minimal photo studio with a plain white backdrop, lookbook style, three-quarter body, soft even light" },
+  { code: "V3", name: { ja: "カフェ窓際", ko: "카페 창가", en: "Cafe window" }, scene: "sitting by a large cafe window with warm afternoon light, relaxed natural pose, waist-up, shallow depth of field" },
+  { code: "V4", name: { ja: "コンクリート壁", ko: "콘크리트 벽", en: "Concrete wall" }, scene: "standing against a sunlit concrete wall, three-quarter body, slight smile, clean minimal composition, soft directional light" },
+  { code: "V5", name: { ja: "横断歩道", ko: "횡단보도", en: "Crosswalk" }, scene: "crossing a city street at a crosswalk, motion in the step, overcast daylight, full body, documentary street-fashion style" },
+  { code: "V6", name: { ja: "公園ベンチ", ko: "공원 벤치", en: "Park bench" }, scene: "sitting on a wooden park bench under soft dappled light, relaxed pose, three-quarter body, muted natural colors" },
+];
+
+function pretestPrompt(locale: Locale, scene: string): string {
+  const who = locale === "en" ? "an American woman in her mid 20s" : locale === "ko" ? "a Korean woman in her mid 20s" : "a Japanese woman in her mid 20s";
+  return `Fashion campaign photograph for a mass-market apparel brand: ${who} wearing a beige oversized trench coat over a white t-shirt and straight light-blue jeans, ${scene}, natural expression, realistic skin and fabric texture, shot on 50mm lens, f/2.8. No text, no letters, no signage, no logo, no watermark, no visible brand marks.`;
+}
+
+const PRETEST_AD_COPY = {
+  ja: { headline: "春の定番、新しく。", body: "軽くて動きやすいオーバーサイズトレンチ。¥9,990", cta: "詳しく見る" },
+  ko: { headline: "봄의 기본, 새롭게.", body: "가볍고 활동적인 오버사이즈 트렌치. 99,000원", cta: "자세히 보기" },
+  en: { headline: "The spring essential, reimagined.", body: "Our lightweight oversized trench. $79.90", cta: "Shop now" },
+};
+
+function pretestItems(locale: Locale): ItemPreset[] {
+  const L = locale === "en" ? L7_EN : locale === "ko" ? L7_KO : L7_JA;
+  const lk = likertWith(L);
+  const T = {
+    ja: {
+      age: ["あなたの年齢を教えてください。", ["18〜24歳", "25〜34歳", "35〜44歳", "45〜54歳", "55〜64歳", "65歳以上"]],
+      gender: ["あなたの性別を教えてください。", ["女性", "男性", "その他", "回答しない"]],
+      ai1: "AIで作られた画像を見分ける自信がある。",
+      ai2: "AI画像生成ツールを使ったことがある。",
+      fash: "手頃な価格のファッションブランド（ユニクロ、GU、ZARA など）の服をよく買う。",
+      quality: "この広告の画像は品質が高い。",
+      real: "この画像は実際に撮影された写真のように見える。",
+      ailike: "この画像はAIで作られたように見える。",
+      attr: "この広告は魅力的だ。",
+      fit: "この広告は手頃な価格のファッションブランドの広告としてふさわしい。",
+      effort: "この広告の制作には手間がかかっていると思う。",
+      made: ["この画像はどのように作られたと思いますか？", ["実際に撮影した写真", "デザイナーが制作した画像", "AIで生成した画像", "わからない"]],
+      odd: "不自然に感じた部分があれば教えてください（任意）。",
+      attn: "注意確認のため、この質問では「2」を選んでください。",
+      open: "全体を通して気づいたことがあれば教えてください（任意）。",
+    },
+    ko: {
+      age: ["귀하의 연령대를 알려 주세요.", ["18~24세", "25~34세", "35~44세", "45~54세", "55~64세", "65세 이상"]],
+      gender: ["귀하의 성별을 알려 주세요.", ["여성", "남성", "기타", "응답하지 않음"]],
+      ai1: "AI로 만든 이미지를 구분할 자신이 있다.",
+      ai2: "AI 이미지 생성 도구를 써 본 적이 있다.",
+      fash: "저렴한 패션 브랜드(유니클로, 자라, 스파오 등)의 옷을 자주 산다.",
+      quality: "이 광고 이미지는 품질이 높다.",
+      real: "이 이미지는 실제로 촬영한 사진처럼 보인다.",
+      ailike: "이 이미지는 AI로 만든 것처럼 보인다.",
+      attr: "이 광고는 매력적이다.",
+      fit: "이 광고는 저렴한 패션 브랜드의 광고로 적합하다.",
+      effort: "이 광고를 만드는 데 공이 많이 들어갔다고 생각한다.",
+      made: ["이 이미지는 어떻게 만들어졌다고 생각하나요?", ["실제로 촬영한 사진", "디자이너가 제작한 이미지", "AI로 생성한 이미지", "모르겠다"]],
+      odd: "부자연스럽게 느껴진 부분이 있으면 적어 주세요 (선택).",
+      attn: "주의 확인을 위해 이 질문에서는 「2」를 선택해 주세요.",
+      open: "전체적으로 느낀 점이 있으면 적어 주세요 (선택).",
+    },
+    en: {
+      age: ["What is your age?", ["18–24", "25–34", "35–44", "45–54", "55–64", "65 or older"]],
+      gender: ["What is your gender?", ["Woman", "Man", "Non-binary / other", "Prefer not to say"]],
+      ai1: "I am confident I can tell AI-generated images from real photos.",
+      ai2: "I have used an AI image generation tool.",
+      fash: "I often buy clothes from affordable fashion brands (e.g., Uniqlo, Zara, H&M).",
+      quality: "The image in this ad is high quality.",
+      real: "This image looks like a real photograph.",
+      ailike: "This image looks like it was made by AI.",
+      attr: "This ad is appealing.",
+      fit: "This ad fits an affordable fashion brand.",
+      effort: "A lot of effort went into making this ad.",
+      made: ["How do you think this image was made?", ["A real photograph", "Created by a designer", "Generated by AI", "Not sure"]],
+      odd: "Did anything look unnatural? (optional)",
+      attn: "To check you are paying attention, please select \"2\" for this question.",
+      open: "Any other comments? (optional)",
+    },
+  }[locale];
+  const single = (phase: SurveyItem["phase"], code: string, construct: string, text: string, options: string[], sort_order: number, required = true): ItemPreset => ({
+    phase, code, construct, text, type: "single", scale_points: 0, scale_labels: [], options, required, sort_order,
+  });
+  const free = (phase: SurveyItem["phase"], code: string, construct: string, text: string, sort_order: number): ItemPreset => ({
+    phase, code, construct, text, type: "text", scale_points: 0, scale_labels: [], options: [], required: false, sort_order,
+  });
+  return [
+    single("pre", "age", "demographic", T.age[0] as string, T.age[1] as string[], 0),
+    single("pre", "gender", "demographic", T.gender[0] as string, T.gender[1] as string[], 1),
+    lk("pre", "ai_conf", "ai_familiarity", T.ai1, 2),
+    lk("pre", "ai_used", "ai_familiarity", T.ai2, 3),
+    lk("pre", "fash_inv", "fashion_involvement", T.fash, 4),
+    lk("post_ad", "quality", "image_quality", T.quality, 0),
+    lk("post_ad", "realism", "realism", T.real, 1),
+    lk("post_ad", "ailike", "ai_likeness", T.ailike, 2),
+    lk("post_ad", "attr", "ad_attractiveness", T.attr, 3),
+    lk("post_ad", "fit", "brand_fit", T.fit, 4),
+    lk("post_ad", "effort", "perceived_effort", T.effort, 5),
+    single("post_ad", "made", "origin_guess", T.made[0] as string, T.made[1] as string[], 6),
+    free("post_ad", "odd", "open_ended", T.odd, 7),
+    { ...lk("final", "attn1", "attention_check", T.attn, 0), options: ["2"] },
+    free("final", "open", "open_ended", T.open, 1),
+  ];
+}
+
+const PRETEST_CONSENT = {
+  ja: `本調査はファッション広告の画像に対する印象を調べる学術的な予備調査です。
+広告画像を6枚ご覧いただき、それぞれについて短い質問にお答えいただきます。所要時間は約6〜8分です。
+回答は匿名で収集され、個人を特定する情報は記録しません。調査はいつでも中断できます。
+下のボタンを押すと、調査への参加に同意したものとみなします。`,
+  ko: `본 조사는 패션 광고 이미지에 대한 인상을 알아보는 학술 예비조사입니다.
+광고 이미지 6장을 보고 각각 짧은 질문에 답해 주시면 됩니다. 약 6~8분 소요됩니다.
+응답은 익명으로 수집되며 개인 식별 정보는 기록하지 않습니다. 언제든 중단할 수 있습니다.
+아래 버튼을 누르면 참여에 동의한 것으로 간주합니다.`,
+  en: `This is an academic pilot study about impressions of fashion advertising images.
+You will see 6 ad images and answer a few short questions about each. It takes about 6–8 minutes.
+Responses are anonymous; no personally identifying information is recorded. You may stop at any time.
+By pressing the button below, you agree to take part.`,
+};
+const PRETEST_DEBRIEF = {
+  ja: `ご協力ありがとうございました。
+本調査で表示した広告とブランドはすべて架空のものであり、画像はすべてAIによって生成されたものです。
+この予備調査の結果は、今後の本調査で使用する広告画像を選ぶために用いられます。`,
+  ko: `참여해 주셔서 감사합니다.
+본 조사에서 보여드린 광고와 브랜드는 모두 가상이며, 이미지는 모두 AI로 생성되었습니다.
+이 예비조사 결과는 본 조사에서 사용할 광고 이미지를 고르는 데 쓰입니다.`,
+  en: `Thank you for participating.
+All ads and brands shown were fictional, and every image was generated by AI.
+The results of this pilot will be used to select the ad images for the main study.`,
+};
+
+/** 예비조사(자극물 선별) 프리셋: 라벨 없는 단일 조건 + 후보 이미지 6장 + 평가 문항 */
+export function getPretestPresets(locale: Locale): PresetBundle {
+  const copy = PRETEST_AD_COPY[locale];
+  return {
+    conditions: [{ ...CONDITION_PRESETS_JA[0], name: locale === "en" ? "No label (pretest)" : locale === "ko" ? "표시 없음 (예비조사)" : "表示なし（予備調査）" }],
+    ads: PRETEST_VARIANTS.map((v, i) => ({
+      code: v.code,
+      name: v.name[locale],
+      brand_name: "LOAM",
+      product_category: "outerwear",
+      headline: copy.headline,
+      body_text: copy.body,
+      cta_text: copy.cta,
+      image_url: "/demo/ad-outerwear.svg",
+      gen_prompt: pretestPrompt(locale, v.scene),
+      gen_model: "",
+      sort_order: i,
+    })),
+    items: pretestItems(locale),
+    consent: PRETEST_CONSENT[locale],
+    debrief: PRETEST_DEBRIEF[locale],
+  };
+}

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getStore } from "@/lib/db";
 import { ADMIN_COOKIE, adminSessionValue, checkPassword, requireAdmin } from "@/lib/auth";
-import { getPresets } from "@/lib/presets";
+import { getPresets, getPretestPresets } from "@/lib/presets";
 import { defaultImageModel, generateImage, IMAGE_MODELS } from "@/lib/imagegen";
 import { asLocale, LOCALES, type Locale } from "@/lib/i18n";
 import { ADMIN_LOCALE_COOKIE, adminDict } from "@/lib/i18n-server";
@@ -89,8 +89,9 @@ export async function createExperimentAction(_prev: FormState, form: FormData): 
   if (await store.getExperimentBySlug(slug)) return { error: d.slugTaken };
 
   const locale = asLocale(str(form, "locale"));
-  const presets = getPresets(locale);
-  const withPresets = bool(form, "with_presets");
+  const kind = str(form, "preset_kind", "main");
+  const presets = kind === "pretest" ? getPretestPresets(locale) : getPresets(locale);
+  const withPresets = kind !== "none";
   const exp = await store.createExperiment({
     slug,
     title,
@@ -98,7 +99,7 @@ export async function createExperimentAction(_prev: FormState, form: FormData): 
     status: "draft",
     consent_text: presets.consent,
     debrief_text: presets.debrief,
-    settings: { ...DEFAULT_SETTINGS, locale },
+    settings: { ...DEFAULT_SETTINGS, locale, ...(kind === "pretest" ? { min_exposure_seconds: 5 } : {}) },
   });
 
   if (withPresets) {
@@ -236,6 +237,8 @@ export async function generateAdImageAction(
   if (!ad) return { error: "ad not found" };
 
   const errors: string[] = [];
+  // 광고에 아직 실제 이미지가 없으면(플레이스홀더) 첫 생성물을 자동 채택
+  let needsAdopt = !ad.image_url || ad.image_url.startsWith("/demo/");
   for (let i = 0; i < count; i++) {
     try {
       const img = await generateImage(prompt, model);
@@ -243,6 +246,10 @@ export async function generateAdImageAction(
       const file = new File([new Uint8Array(img.bytes)], `${ad.code}-${Date.now()}-${i}.${ext}`, { type: img.mime });
       const url = await store.uploadImage(file, file.name);
       await store.createAdImage({ experiment_id: experimentId, ad_id: adId, image_url: url, prompt, model: img.model });
+      if (needsAdopt) {
+        await store.updateAd(adId, { image_url: url, gen_prompt: prompt, gen_model: img.model });
+        needsAdopt = false;
+      }
     } catch (e) {
       errors.push(e instanceof Error ? e.message : String(e));
       break;

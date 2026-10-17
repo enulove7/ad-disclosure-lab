@@ -33,10 +33,13 @@ export default async function NewExperimentPage() {
           <Field name="description" title={d.memo}>
             <textarea id="description" name="description" className={input} rows={2} />
           </Field>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="with_presets" defaultChecked />
-            {d.withPresets}
-          </label>
+          <Field name="preset_kind" title={d.presetKind}>
+            <select id="preset_kind" name="preset_kind" defaultValue="main" className={input}>
+              <option value="main">{d.presetMain}</option>
+              <option value="pretest">{d.presetPretest}</option>
+              <option value="none">{d.presetNone}</option>
+            </select>
+          </Field>
           <button className={btn}>{d.create}</button>
         </SaveForm>
       </Card>
