@@ -77,23 +77,12 @@ scripts/e2e/flow.mjs    Playwright 스모크 테스트(관리자 생성 → 참�
 | conditions | 공개 라벨 조건. `label_config`(enabled/text/description/position/size/style/show_icon) |
 | ads | 광고 소재. 가상 브랜드, 문구, 이미지, 제품 카테고리, 채택 이미지의 생성 프롬프트·모델 |
 | ad_images | AI 로 생성한 광고 이미지 후보 (프롬프트·모델·URL) |
-| games / game_cards | 게임과 카드(이미지, AI 여부, 출처 메모) |
-| game_sessions / game_answers | 게임 1판과 카드별 답변(판정, 정답 여부, 호감도 전후, 반응 시간) |
 | survey_items | 설문 문항. phase = pre / post_ad / final, construct = 분석용 구성개념 |
 | participants | 참가자. 조건 배정 결과, 상태, 시작·완료 시각 |
 | exposures | 참가자 × 광고 노출. 순서, 노출 시각, 노출 시간(ms), 라벨 스냅샷 |
 | responses | 응답 1건 = 1행. exposure_id 로 어느 광고에 대한 응답인지 연결 |
 
 조건을 나중에 수정해도 `exposures.label_snapshot`에 노출 당시 라벨이 남아 있으므로 과거 데이터 해석이 꼬이지 않는다.
-
-## 「AI일까 사람일까」 게임
-
-관리자 → 게임에서 만든다. 참가자는 `/g/<slug>` 에서 카드(광고)를 한 장씩 보고 호감도(1~7) → AI/사람 판정 → 정답 공개 → 호감도 재측정 순으로 진행하고,
-마지막에 판별률·상위 %·호감도 변화·공유 버튼·본 실험 링크가 나온다. 관리자에는 카드별 정답률과 호감도 변화 통계가 보인다.
-
-- AI 카드: 카드마다 "AI로 이미지를 생성" 패널로 바로 만든다 (`GEMINI_API_KEY` 필요).
-- 사람 제작 카드: 사용 허락이 있는 이미지만 업로드한다(직접 제작, 무료 소재, 허락받은 것). 실제 브랜드 광고는 저작권 때문에 쓸 수 없다. 출처는 카드의 메모란에 남긴다.
-- 테스트: `node scripts/e2e/game.mjs` (관리자 생성 → 참가자 3명 플레이 → 통계).
 
 ## 결과 탭과 분석
 
@@ -125,5 +114,4 @@ node scripts/e2e/flow.mjs
 ## 다음 단계
 
 - 2단계: 파일럿 → 분석 스크립트(R/Python) → 관리자 화면에 조건별 평균 그래프
-- 3단계: 「AI일까 사람일까」 스와이프 게임 모듈
 - 논문 전환 시: 검증된 척도 원문으로 문항 교체, 표본 수 계산, 사전등록, 윤리심사

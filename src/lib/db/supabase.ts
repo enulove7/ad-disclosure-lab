@@ -6,10 +6,6 @@ import type {
   Condition,
   Experiment,
   Exposure,
-  Game,
-  GameAnswer,
-  GameCard,
-  GameSession,
   Participant,
   Response,
   SurveyItem,
@@ -135,43 +131,6 @@ export function createSupabaseStore(url: string, serviceKey: string): Store {
       const ids = await participantIds(eid);
       if (ids.length === 0) return [];
       return unwrap<Response[]>(await sb.from("responses").select("*").in("participant_id", ids));
-    },
-
-    // ---------- games ----------
-    async listGames() {
-      return unwrap<Game[]>(await sb.from("games").select("*").order("created_at", { ascending: false }));
-    },
-    async getGame(id) {
-      const { data, error } = await sb.from("games").select("*").eq("id", id).maybeSingle();
-      if (error) throw new Error(error.message);
-      return (data as Game | null) ?? null;
-    },
-    async getGameBySlug(slug) {
-      const { data, error } = await sb.from("games").select("*").eq("slug", slug).maybeSingle();
-      if (error) throw new Error(error.message);
-      return (data as Game | null) ?? null;
-    },
-    createGame: (d) => insertOne<Game>("games", d),
-    updateGame: (id, p) => updateOne<Game>("games", id, p),
-    deleteGame: (id) => remove("games", id),
-    listGameCards: (gid) => list<GameCard>("game_cards", { game_id: gid }),
-    createGameCard: (d) => insertOne<GameCard>("game_cards", d),
-    updateGameCard: (id, p) => updateOne<GameCard>("game_cards", id, p),
-    deleteGameCard: (id) => remove("game_cards", id),
-    createGameSession: (d) => insertOne<GameSession>("game_sessions", d),
-    async getGameSessionByToken(token) {
-      const { data, error } = await sb.from("game_sessions").select("*").eq("token", token).maybeSingle();
-      if (error) throw new Error(error.message);
-      return (data as GameSession | null) ?? null;
-    },
-    updateGameSession: (id, p) => updateOne<GameSession>("game_sessions", id, p),
-    listGameSessions: (gid) => list<GameSession>("game_sessions", { game_id: gid }, "started_at"),
-    createGameAnswer: (d) => insertOne<GameAnswer>("game_answers", d),
-    listGameAnswers: (sid) => list<GameAnswer>("game_answers", { session_id: sid }),
-    async listGameAnswersByGame(gid) {
-      const sids = unwrap<{ id: string }[]>(await sb.from("game_sessions").select("id").eq("game_id", gid)).map((r) => r.id);
-      if (sids.length === 0) return [];
-      return unwrap<GameAnswer[]>(await sb.from("game_answers").select("*").in("session_id", sids));
     },
 
     async uploadImage(file, filename) {
