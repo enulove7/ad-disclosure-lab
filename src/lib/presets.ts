@@ -589,25 +589,106 @@ export function labelSummary(l: LabelConfig): string {
 // ===================== 예비조사(자극물 선별) 프리셋 =====================
 // 라벨 없는 단일 조건에서 후보 이미지 여러 장을 평가해 본 실험용 자극물을 고른다.
 
-const PRETEST_VARIANTS: Array<{ code: string; name: { ja: string; ko: string; en: string }; scene: string }> = [
-  { code: "V1", name: { ja: "路地（歩き）", ko: "골목 (걷기)", en: "Backstreet (walking)" }, scene: "walking on a quiet residential backstreet in soft overcast daylight, candid editorial style, full body" },
-  { code: "V2", name: { ja: "スタジオ白背景", ko: "스튜디오 흰 배경", en: "Studio white background" }, scene: "standing in a bright minimal photo studio with a plain white backdrop, lookbook style, three-quarter body, soft even light" },
-  { code: "V3", name: { ja: "カフェ窓際", ko: "카페 창가", en: "Cafe window" }, scene: "sitting by a large cafe window with warm afternoon light, relaxed natural pose, waist-up, shallow depth of field" },
-  { code: "V4", name: { ja: "コンクリート壁", ko: "콘크리트 벽", en: "Concrete wall" }, scene: "standing against a sunlit concrete wall, three-quarter body, slight smile, clean minimal composition, soft directional light" },
-  { code: "V5", name: { ja: "横断歩道", ko: "횡단보도", en: "Crosswalk" }, scene: "crossing a city street at a crosswalk, motion in the step, overcast daylight, full body, documentary street-fashion style" },
-  { code: "V6", name: { ja: "公園ベンチ", ko: "공원 벤치", en: "Park bench" }, scene: "sitting on a wooden park bench under soft dappled light, relaxed pose, three-quarter body, muted natural colors" },
-];
-
-function pretestPrompt(locale: Locale, scene: string): string {
-  const who = locale === "en" ? "an American woman in her mid 20s" : locale === "ko" ? "a Korean woman in her mid 20s" : "a Japanese woman in her mid 20s";
-  return `Fashion campaign photograph for a mass-market apparel brand: ${who} wearing a beige oversized trench coat over a white t-shirt and straight light-blue jeans, ${scene}, natural expression, realistic skin and fabric texture, shot on 50mm lens, f/2.8. No text, no letters, no signage, no logo, no watermark, no visible brand marks.`;
+type Copy = { headline: string; body: string };
+interface PretestVariant {
+  code: string;
+  name: { ja: string; ko: string; en: string };
+  /** 인물 유무. 분석용 product_category 에도 기록된다 */
+  person: boolean;
+  /** 인물 묘사(국가별) + 옷 + 장면 */
+  subject: { ja: string; ko: string; en: string } | null;
+  outfit: string;
+  scene: string;
+  copy: { ja: Copy; ko: Copy; en: Copy };
 }
 
-const PRETEST_AD_COPY = {
-  ja: { headline: "春の定番、新しく。", body: "軽くて動きやすいオーバーサイズトレンチ。¥9,990", cta: "詳しく見る" },
-  ko: { headline: "봄의 기본, 새롭게.", body: "가볍고 활동적인 오버사이즈 트렌치. 99,000원", cta: "자세히 보기" },
-  en: { headline: "The spring essential, reimagined.", body: "Our lightweight oversized trench. $79.90", cta: "Shop now" },
-};
+const PRETEST_VARIANTS: PretestVariant[] = [
+  {
+    code: "V1",
+    name: { ja: "トレンチコート（女性・路地）", ko: "트렌치코트 (여성·골목)", en: "Trench coat (woman, backstreet)" },
+    person: true,
+    subject: { ja: "a Japanese woman in her mid 20s", ko: "a Korean woman in her mid 20s", en: "an American woman in her mid 20s" },
+    outfit: "wearing a beige oversized trench coat over a white t-shirt and straight light-blue jeans",
+    scene: "walking on a quiet residential backstreet in soft overcast daylight, candid editorial style, full body",
+    copy: {
+      ja: { headline: "春の定番、新しく。", body: "軽くて動きやすいオーバーサイズトレンチ。¥9,990" },
+      ko: { headline: "봄의 기본, 새롭게.", body: "가볍고 활동적인 오버사이즈 트렌치. 99,000원" },
+      en: { headline: "The spring essential, reimagined.", body: "Our lightweight oversized trench. $79.90" },
+    },
+  },
+  {
+    code: "V2",
+    name: { ja: "スウェット（男性・壁）", ko: "스웨트셔츠 (남성·벽)", en: "Sweatshirt (man, wall)" },
+    person: true,
+    subject: { ja: "a Japanese man in his late 20s", ko: "a Korean man in his late 20s", en: "an American man in his late 20s" },
+    outfit: "wearing a plain heather-grey crewneck sweatshirt and black tapered chino pants",
+    scene: "standing against a sunlit concrete wall, three-quarter body, slight smile, clean minimal composition",
+    copy: {
+      ja: { headline: "毎日着たい、ちょうどいい。", body: "肌ざわりのいいクルーネックスウェット。全6色 ¥3,990" },
+      ko: { headline: "매일 입고 싶은, 딱 좋은.", body: "부드러운 크루넥 스웨트셔츠. 6색 39,000원" },
+      en: { headline: "The one you'll reach for every day.", body: "Soft crewneck sweatshirt in 6 colors. $29.90" },
+    },
+  },
+  {
+    code: "V3",
+    name: { ja: "カーディガン（女性・カフェ）", ko: "가디건 (여성·카페)", en: "Cardigan (woman, cafe)" },
+    person: true,
+    subject: { ja: "a Japanese woman in her early 30s", ko: "a Korean woman in her early 30s", en: "an American woman in her early 30s" },
+    outfit: "wearing a navy fine-knit cardigan over a white top with off-white wide-leg trousers",
+    scene: "sitting by a large cafe window with warm afternoon light, relaxed natural pose, waist-up, shallow depth of field",
+    copy: {
+      ja: { headline: "羽織るだけで、きちんと。", body: "シワになりにくいニットカーディガン。¥4,990" },
+      ko: { headline: "걸치기만 해도, 단정하게.", body: "구김이 적은 니트 가디건. 49,000원" },
+      en: { headline: "Throw it on, look put together.", body: "Wrinkle-resistant knit cardigan. $39.90" },
+    },
+  },
+  {
+    code: "V4",
+    name: { ja: "デニムジャケット（男性・横断歩道）", ko: "데님 재킷 (남성·횡단보도)", en: "Denim jacket (man, crosswalk)" },
+    person: true,
+    subject: { ja: "a Japanese man in his early 20s", ko: "a Korean man in his early 20s", en: "an American man in his early 20s" },
+    outfit: "wearing a light-wash denim jacket over a white t-shirt with dark straight jeans and white sneakers",
+    scene: "crossing a city street at a crosswalk, motion in the step, overcast daylight, full body, documentary street-fashion style",
+    copy: {
+      ja: { headline: "一枚で、春。", body: "やわらかく育つライトデニムジャケット。¥5,990" },
+      ko: { headline: "한 벌로, 봄.", body: "부드럽게 길드는 라이트 데님 재킷. 59,000원" },
+      en: { headline: "One jacket, all spring.", body: "Light-wash denim jacket that softens with wear. $49.90" },
+    },
+  },
+  {
+    code: "V5",
+    name: { ja: "コーデ（人物なし・平置き）", ko: "코디 세트 (인물 없음·플랫레이)", en: "Outfit flat lay (no person)" },
+    person: false,
+    subject: null,
+    outfit: "a beige trench coat, a folded white t-shirt and light-blue straight jeans with white sneakers",
+    scene: "arranged as a neat top-down flat lay on a natural linen surface, soft window light, product photography, no people",
+    copy: {
+      ja: { headline: "春の定番、新しく。", body: "トレンチ ¥9,990 / Tシャツ ¥1,500 / デニム ¥3,990" },
+      ko: { headline: "봄의 기본, 새롭게.", body: "트렌치 99,000원 / 티셔츠 15,000원 / 데님 39,000원" },
+      en: { headline: "The spring essential, reimagined.", body: "Trench $79.90 / Tee $12.90 / Jeans $34.90" },
+    },
+  },
+  {
+    code: "V6",
+    name: { ja: "コート（人物なし・ハンガー）", ko: "코트 (인물 없음·옷걸이)", en: "Coat on hanger (no person)" },
+    person: false,
+    subject: null,
+    outfit: "a camel wool-blend coat on a wooden hanger",
+    scene: "hanging on a simple rail against a plain white studio wall, soft directional light, minimal product photography, no people",
+    copy: {
+      ja: { headline: "長く着たい、一着。", body: "ウール混のスタンドカラーコート。¥12,990" },
+      ko: { headline: "오래 입고 싶은, 한 벌.", body: "울 혼방 스탠드칼라 코트. 129,000원" },
+      en: { headline: "The one coat you'll keep.", body: "Wool-blend stand-collar coat. $99.90" },
+    },
+  },
+];
+
+function pretestPrompt(locale: Locale, v: PretestVariant): string {
+  const who = v.subject ? `${v.subject[locale]} ${v.outfit}, ` : `${v.outfit}, `;
+  return `Fashion campaign photograph for a mass-market apparel brand: ${who}${v.scene}, realistic fabric texture${v.person ? ", natural expression, realistic skin texture" : ""}, shot on 50mm lens, f/2.8. No text, no letters, no signage, no logo, no watermark, no visible brand marks.`;
+}
+
+const PRETEST_CTA = { ja: "詳しく見る", ko: "자세히 보기", en: "Shop now" };
 
 function pretestItems(locale: Locale): ItemPreset[] {
   const L = locale === "en" ? L7_EN : locale === "ko" ? L7_KO : L7_JA;
@@ -718,19 +799,18 @@ The results of this pilot will be used to select the ad images for the main stud
 
 /** 예비조사(자극물 선별) 프리셋: 라벨 없는 단일 조건 + 후보 이미지 6장 + 평가 문항 */
 export function getPretestPresets(locale: Locale): PresetBundle {
-  const copy = PRETEST_AD_COPY[locale];
   return {
     conditions: [{ ...CONDITION_PRESETS_JA[0], name: locale === "en" ? "No label (pretest)" : locale === "ko" ? "표시 없음 (예비조사)" : "表示なし（予備調査）" }],
     ads: PRETEST_VARIANTS.map((v, i) => ({
       code: v.code,
       name: v.name[locale],
       brand_name: "LOAM",
-      product_category: "outerwear",
-      headline: copy.headline,
-      body_text: copy.body,
-      cta_text: copy.cta,
+      product_category: v.person ? "with_person" : "no_person",
+      headline: v.copy[locale].headline,
+      body_text: v.copy[locale].body,
+      cta_text: PRETEST_CTA[locale],
       image_url: "/demo/ad-outerwear.svg",
-      gen_prompt: pretestPrompt(locale, v.scene),
+      gen_prompt: pretestPrompt(locale, v),
       gen_model: "",
       sort_order: i,
     })),
