@@ -788,6 +788,41 @@ The brand and the ad shown in this study are fictional, and the image was genera
 The study examines how disclosing the use of AI in advertising affects consumer responses. Some participants saw the ad without an AI label; this was necessary to compare responses and we apologize for not telling you in advance.
 If you have questions about the study, please contact the researcher through the survey platform.`,
   },
+  ko: {
+    brand: "LOAM",
+    label: "이 이미지는 AI로 생성되었습니다",
+    effortStem: "이 광고의 제작은…",
+    effort: [["시간이 들지 않았다", "시간이 많이 들었다"], ["노력이 들지 않았다", "노력이 많이 들었다"], ["어렵지 않았다", "어려웠다"]],
+    auth: [
+      "이 광고에서 LOAM이라는 브랜드의 기준이 분명하게 전달된다.",
+      "이 광고는 LOAM 브랜드다움을 반영하는 것 같다.",
+      "이 광고는 내가 LOAM 브랜드에 대해 아는 것과 연결되는 것 같다.",
+      "이 광고는 LOAM 브랜드의 이미지와 일치한다.",
+      "이 광고는 나에게 LOAM 브랜드를 특별하게 만드는 점을 담고 있다.",
+    ],
+    agree: ["전혀 그렇지 않다", "매우 그렇다"],
+    evalStem: "전체적으로 이 광고는…",
+    evalPairs: [["호감이 가지 않는다", "호감이 간다"], ["부정적이다", "긍정적이다"], ["나쁘다", "좋다"], ["불쾌하다", "유쾌하다"], ["싫다", "좋다"]],
+    pi: ["이 제품을 구매할 가능성은…", "이 제품 구매를 고려할 가능성은…", "이 제품을 사고 싶은 마음은…"],
+    piAnchors: ["매우 낮다", "매우 높다"],
+    aias: ["AI는 내 삶을 더 좋게 만들 것이라고 믿는다.", "AI는 내 일을 더 좋게 만들 것이라고 믿는다.", "앞으로 AI 기술을 사용할 것 같다.", "AI 기술은 인류에게 긍정적이라고 생각한다."],
+    aiasAnchors: ["전혀 아니다", "전적으로 동의한다"],
+    mc: ["앞서 본 광고에 이미지가 AI로 생성되었다는 표시가 있었습니까?", ["있었다", "없었다", "모르겠다"]],
+    mc2: "광고 이미지는 AI로 만들어졌다고 생각한다.",
+    attn: "주의 확인을 위해 이 질문에서는 「2」를 선택해 주세요.",
+    age: ["귀하의 연령대를 알려 주세요.", ["18~24세", "25~34세", "35~44세", "45~54세", "55~64세", "65세 이상"]],
+    gender: ["귀하의 성별을 알려 주세요.", ["여성", "남성", "기타", "응답하지 않음"]],
+    country: ["현재 거주하는 국가를 알려 주세요.", ["한국", "일본", "미국", "기타"]],
+    open: "광고나 이 조사에 대해 의견이 있으면 적어 주세요 (선택).",
+    consent: `본 조사는 광고에 대한 인상을 알아보는 학술 조사로, 석사 논문을 위해 실시합니다.
+광고 1개를 보고 그에 대한 질문에 답해 주시면 됩니다. 약 5분 소요됩니다.
+응답은 익명으로 수집되어 안전한 서버에 저장되며, 개인을 식별할 수 있는 정보는 기록하지 않습니다. 조사는 언제든지 불이익 없이 중단할 수 있습니다.
+아래 버튼을 누르면 만 18세 이상이며 조사 참여에 동의한 것으로 간주합니다.`,
+    debrief: `참여해 주셔서 감사합니다.
+본 조사에서 보여드린 브랜드와 광고는 가상이며, 이미지는 AI로 생성되었습니다.
+본 조사는 광고에서 AI 사용을 공개하는 것이 소비자 반응에 어떤 영향을 미치는지 알아보는 연구입니다. 일부 참가자에게는 AI 표시가 없는 광고를 보여드렸습니다. 반응을 비교하기 위해 필요한 절차였으며, 미리 알려드리지 못한 점 양해 부탁드립니다.
+조사에 대해 궁금한 점이 있으면 조사 플랫폼을 통해 연구자에게 문의해 주세요.`,
+  },
   ja: {
     brand: "LOAM",
     label: "この画像はAIで生成されました",
@@ -827,8 +862,8 @@ If you have questions about the study, please contact the researcher through the
 
 /** 본 실험 프리셋: 조건 2개(공개 없음/있음), 광고 1개, 논문 척도 */
 export function getThesisPresets(locale: Locale): PresetBundle {
-  const T = locale === "ja" ? THESIS.ja : THESIS.en; // ko 는 영어판으로 대체
-  const loc: Locale = locale === "ja" ? "ja" : "en";
+  const T = locale === "ja" ? THESIS.ja : locale === "ko" ? THESIS.ko : THESIS.en;
+  const loc: Locale = locale;
   const base = getPresets(loc);
   const lkAgree = likertWith(T.agree);
   const single = (phase: SurveyItem["phase"], code: string, construct: string, text: string, options: string[], sort_order: number): ItemPreset => ({
@@ -850,10 +885,10 @@ export function getThesisPresets(locale: Locale): PresetBundle {
     lkAgree("final", "mc_ai", "manipulation_check", T.mc2, 1),
     { phase: "final", code: "open", construct: "open_ended", text: T.open, type: "text", scale_points: 0, scale_labels: [], options: [], required: false, sort_order: 2 },
   ];
-  const noLabel = { ...CONDITION_PRESETS_JA[0], name: loc === "ja" ? "AI非開示" : "No disclosure" };
+  const noLabel = { ...CONDITION_PRESETS_JA[0], name: loc === "ja" ? "AI非開示" : loc === "ko" ? "AI 비공개" : "No disclosure" };
   const withLabel: Omit<Condition, "id" | "experiment_id"> = {
     code: "C1",
-    name: loc === "ja" ? "AI開示（表示あり）" : "AI disclosure (label)",
+    name: loc === "ja" ? "AI開示（表示あり）" : loc === "ko" ? "AI 공개 (표시 있음)" : "AI disclosure (label)",
     weight: 1,
     sort_order: 1,
     label_config: { enabled: true, text: T.label, description: "", position: "top-left", size: "md", style: "badge", show_icon: true },
